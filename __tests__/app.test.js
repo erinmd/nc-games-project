@@ -84,7 +84,7 @@ describe('api', () => {
       .get('/api/reviews/bananas')
       .expect(400)
       .then(({body:{msg}}) => {
-        expect(msg).toBe('Bad request')
+        expect(msg).toBe('Invalid id')
       })
   })
   test('200: GET request responds with an array of comments', () => {
@@ -111,15 +111,16 @@ describe('api', () => {
       .get('/api/reviews/10000/comments')
       .expect(404)
       .then(({body:{msg}}) => {
-        expect(msg).toBe('No comments found')
+        expect(msg).toBe('Review not found')
       })
   })
-  test('404: GET request where review id has no comments', () => {
+  test('200: GET request where review id has no comments', () => {
     return request(app)
       .get('/api/reviews/1/comments')
-      .expect(404)
-      .then(({body:{msg}}) => {
-        expect(msg).toBe('No comments found')
+      .expect(200)
+      .then(({body:{comments}}) => {
+        expect(comments).toBeInstanceOf(Array)
+        expect(comments).toHaveLength(0)
       })
   })
   test('400: GET request with invalid id returns bad request', () => {
@@ -127,7 +128,7 @@ describe('api', () => {
       .get('/api/reviews/bananas/comments')
       .expect(400)
       .then(({body:{msg}}) => {
-        expect(msg).toBe('Bad request')
+        expect(msg).toBe('Invalid id')
       })
   })
 })
