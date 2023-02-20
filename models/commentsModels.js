@@ -14,18 +14,15 @@ exports.selectComments = (reviewId) => {
 }
 
 exports.insertComment = (newComment, reviewId) => {
-    let {username, body, votes, created_at} = newComment
-    if (!votes) votes = 0
-    if (!created_at) created_at = 'NOW()'
-
+    let {username, body} = newComment
     return selectReview(reviewId)
     .then(() => {
     return db.query(
         `INSERT INTO comments
-        (body, author, review_id, votes, created_at)
+        (body, author, review_id)
         VALUES
-        ($1, $2, $3, $4, $5)
-        RETURNING *;`, [body, username, reviewId, votes, created_at]
+        ($1, $2, $3)
+        RETURNING *;`, [body, username, reviewId]
     )}).then(res => {
         return res.rows[0]
     })
