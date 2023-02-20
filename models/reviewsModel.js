@@ -41,3 +41,14 @@ exports.updateReview = (reviewId, voteInc) => {
       return res.rows[0]
     })
 }
+
+exports.selectReview = (reviewId) => {
+    return db.query(
+        `SELECT * FROM reviews
+         WHERE review_id = $1`, [reviewId]
+    ).then((res) => {
+        if (!res.rowCount) return Promise.reject({status: 404, msg: "Review not found"})
+        return res.rows[0]})
+}
+
+
