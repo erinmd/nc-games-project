@@ -84,7 +84,7 @@ describe('api', () => {
       .get('/api/reviews/bananas')
       .expect(400)
       .then(({body:{msg}}) => {
-        expect(msg).toBe('Bad request')
+        expect(msg).toBe('Invalid id')
       })
   })
   test('201: POST request responds with comment object', () => {
@@ -117,5 +117,13 @@ describe('api', () => {
       .then(({body:{msg}}) => {
         expect(msg).toBe("Key (author)=(Erin) is not present in table \"users\".")
       })
+  })
+  test('400: POST request with invalid id', () => {
+    return request(app)
+    .post('/api/reviews/bananas/comments').send({username: 'Erin', body: "The best game ever!"})
+    .expect(400)
+    .then(({body:{msg}}) => {
+      expect(msg).toBe('Invalid id')
+    })
   })
 })
