@@ -35,28 +35,29 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
-      .then(({body:{reviews}}) => {
+      .then(({ body: { reviews } }) => {
         expect(reviews).toHaveLength(13)
-        reviews.forEach(review => expect(review).toMatchObject({
-          owner: expect.any(String),
-          title: expect.any(String),
-          review_id: expect.any(Number),
-          category: expect.any(String),
-          review_img_url: expect.any(String),
-          created_at: expect.any(String),
-          votes: expect.any(Number),
-          designer: expect.any(String),
-          comment_count: expect.any(Number),
-        })
-      )
-      expect(reviews).toBeSortedBy('created_at', {descending: true} )
+        reviews.forEach(review =>
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(Number)
+          })
+        )
+        expect(reviews).toBeSortedBy('created_at', { descending: true })
       })
   })
   test('200: GET request responds with a review object', () => {
     return request(app)
       .get('/api/reviews/2')
       .expect(200)
-      .then(({body: {review}}) => {
+      .then(({ body: { review } }) => {
         expect(review).toEqual({
           review_id: 2,
           title: 'Jenga',
@@ -66,7 +67,7 @@ describe('api', () => {
             'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
           review_body: 'Fiddly fun for all the family',
           category: 'dexterity',
-          created_at: "2021-01-18T10:01:41.251Z",
+          created_at: '2021-01-18T10:01:41.251Z',
           votes: 5
         })
       })
@@ -75,7 +76,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/10000')
       .expect(404)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Review not found')
       })
   })
@@ -83,7 +84,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/bananas')
       .expect(400)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Invalid id')
       })
   })
@@ -91,7 +92,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
-      .then(({body:{comments}}) => {
+      .then(({ body: { comments } }) => {
         expect(comments).toHaveLength(3)
         comments.forEach(comment => {
           expect(comment).toMatchObject({
@@ -100,17 +101,17 @@ describe('api', () => {
             created_at: expect.any(String),
             author: expect.any(String),
             body: expect.any(String),
-            review_id: expect.any(Number),
+            review_id: expect.any(Number)
           })
         })
-        expect(comments).toBeSortedBy('created_at', {descending: true} )
+        expect(comments).toBeSortedBy('created_at', { descending: true })
       })
   })
   test('404: GET request with an id out of range returns "Not Found"', () => {
     return request(app)
       .get('/api/reviews/10000/comments')
       .expect(404)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Review not found')
       })
   })
@@ -118,7 +119,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/1/comments')
       .expect(200)
-      .then(({body:{comments}}) => {
+      .then(({ body: { comments } }) => {
         expect(comments).toBeInstanceOf(Array)
         expect(comments).toHaveLength(0)
       })
@@ -127,7 +128,72 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/bananas/comments')
       .expect(400)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid id')
+      })
+  })
+  test('201 PATCH request responds with updated review with incremented votes', () => {
+    return request(app)
+      .patch('/api/reviews/2')
+      .send({ inc_votes: 2 })
+      .then(({ body: { review } }) => {
+        expect(review).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 7
+        })
+      })
+  })
+  test('201 PATCH request responds with updated review with decremented votes', () => {
+    return request(app)
+      .patch('/api/reviews/2')
+      .send({ inc_votes: -2 })
+      .then(({ body: { review } }) => {
+        expect(review).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 3
+        })
+      })
+  })
+  test('404: PATCH request responds with review id not found', () => {
+    return request(app)
+      .patch('/api/reviews/1000')
+      .send({ inc_votes: 2 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Review not found')
+      })
+  })
+  test.skip('400: PATCH request responds with missing key', () => {
+    return request(app)
+      .patch('/api/reviews/1')
+      .send({})
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Missing key info')
+      })
+  })
+  test('400: GET request with invalid id returns bad request', () => {
+    return request(app)
+      .patch('/api/reviews/bananas')
+      .send({ inc_votes: 2 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Invalid id')
       })
   })
