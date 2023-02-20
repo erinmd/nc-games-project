@@ -15,5 +15,7 @@ exports.handlePsqlError = (err, req, res, next) => {
         res.status(400).send({msg:"Invalid id"})
     }  else if (err.code === '23503') {
         res.status(400).send({msg:err.detail})
+    }  else if (err.code === '23502') {
+        res.status(400).send({msg: "Missing key information from body"})
     } else next(err)
 }
