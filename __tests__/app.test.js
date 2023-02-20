@@ -84,7 +84,51 @@ describe('api', () => {
       .get('/api/reviews/bananas')
       .expect(400)
       .then(({body:{msg}}) => {
-        expect(msg).toBe('Bad request')
+        expect(msg).toBe('Invalid id')
+      })
+  })
+  test('200: GET request responds with an array of comments', () => {
+    return request(app)
+      .get('/api/reviews/2/comments')
+      .expect(200)
+      .then(({body:{comments}}) => {
+        expect(comments).toHaveLength(3)
+        comments.forEach(comment => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            review_id: expect.any(Number),
+          })
+        })
+        expect(comments).toBeSortedBy('created_at', {descending: true} )
+      })
+  })
+  test('404: GET request with an id out of range returns "Not Found"', () => {
+    return request(app)
+      .get('/api/reviews/10000/comments')
+      .expect(404)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe('Review not found')
+      })
+  })
+  test('200: GET request where review id has no comments', () => {
+    return request(app)
+      .get('/api/reviews/1/comments')
+      .expect(200)
+      .then(({body:{comments}}) => {
+        expect(comments).toBeInstanceOf(Array)
+        expect(comments).toHaveLength(0)
+      })
+  })
+  test('400: GET request with invalid id returns bad request', () => {
+    return request(app)
+      .get('/api/reviews/bananas/comments')
+      .expect(400)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe('Invalid id')
       })
   })
 })
