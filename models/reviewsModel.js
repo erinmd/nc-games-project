@@ -18,3 +18,17 @@ exports.selectReview = (reviewId) => {
         if (!res.rowCount) return Promise.reject({status: 404, msg: "Review not found"})
         return res.rows[0]})
 }
+
+
+exports.insertComment = (newComment, reviewId) => {
+    const {username, body} = newComment
+    return db.query(
+        `INSERT INTO comments
+        (body, author, review_id)
+        VALUES
+        ($1, $2, $3)
+        RETURNING *;`, [body, username, reviewId]
+    ).then(res => {
+        return res.rows[0]
+    })
+}

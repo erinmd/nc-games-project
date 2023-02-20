@@ -87,4 +87,35 @@ describe('api', () => {
         expect(msg).toBe('Bad request')
       })
   })
+  test('201: POST request responds with comment object', () => {
+    return request(app)
+      .post('/api/reviews/1/comments').send({username: 'mallionaire', body: "The best game ever!"})
+      .expect(201)
+      .then(({body:{comment}}) => {
+        expect(comment).toEqual({
+          comment_id: 7,
+          body: 'The best game ever!',
+          votes: 0,
+          author: 'mallionaire',
+          review_id: 1,
+          created_at: expect.any(String),
+        })
+      })
+  })
+  test('400: POST request with an id out of range', () => {
+    return request(app)
+      .post('/api/reviews/10000/comments').send({username: 'mallionaire', body: "The best game ever!"})
+      .expect(400)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe('Key (review_id)=(10000) is not present in table "reviews".')
+      })
+  })
+  test('400: POST request with a username that does not exist', () => {
+    return request(app)
+      .post('/api/reviews/1/comments').send({username: 'Erin', body: "The best game ever!"})
+      .expect(400)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe("Key (author)=(Erin) is not present in table \"users\".")
+      })
+  })
 })
