@@ -35,28 +35,29 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
-      .then(({body:{reviews}}) => {
+      .then(({ body: { reviews } }) => {
         expect(reviews).toHaveLength(13)
-        reviews.forEach(review => expect(review).toMatchObject({
-          owner: expect.any(String),
-          title: expect.any(String),
-          review_id: expect.any(Number),
-          category: expect.any(String),
-          review_img_url: expect.any(String),
-          created_at: expect.any(String),
-          votes: expect.any(Number),
-          designer: expect.any(String),
-          comment_count: expect.any(Number),
-        })
-      )
-      expect(reviews).toBeSortedBy('created_at', {descending: true} )
+        reviews.forEach(review =>
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(Number)
+          })
+        )
+        expect(reviews).toBeSortedBy('created_at', { descending: true })
       })
   })
   test('200: GET request responds with a review object', () => {
     return request(app)
       .get('/api/reviews/2')
       .expect(200)
-      .then(({body: {review}}) => {
+      .then(({ body: { review } }) => {
         expect(review).toEqual({
           review_id: 2,
           title: 'Jenga',
@@ -66,7 +67,7 @@ describe('api', () => {
             'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
           review_body: 'Fiddly fun for all the family',
           category: 'dexterity',
-          created_at: "2021-01-18T10:01:41.251Z",
+          created_at: '2021-01-18T10:01:41.251Z',
           votes: 5
         })
       })
@@ -75,7 +76,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/10000')
       .expect(404)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Review not found')
       })
   })
@@ -83,7 +84,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/bananas')
       .expect(400)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Invalid id')
       })
   })
@@ -91,7 +92,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
-      .then(({body:{comments}}) => {
+      .then(({ body: { comments } }) => {
         expect(comments).toHaveLength(3)
         comments.forEach(comment => {
           expect(comment).toMatchObject({
@@ -100,17 +101,17 @@ describe('api', () => {
             created_at: expect.any(String),
             author: expect.any(String),
             body: expect.any(String),
-            review_id: expect.any(Number),
+            review_id: expect.any(Number)
           })
         })
-        expect(comments).toBeSortedBy('created_at', {descending: true} )
+        expect(comments).toBeSortedBy('created_at', { descending: true })
       })
   })
   test('404: GET request with an id out of range returns "Not Found"', () => {
     return request(app)
       .get('/api/reviews/10000/comments')
       .expect(404)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Review not found')
       })
   })
@@ -118,7 +119,7 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/1/comments')
       .expect(200)
-      .then(({body:{comments}}) => {
+      .then(({ body: { comments } }) => {
         expect(comments).toBeInstanceOf(Array)
         expect(comments).toHaveLength(0)
       })
@@ -127,8 +128,60 @@ describe('api', () => {
     return request(app)
       .get('/api/reviews/bananas/comments')
       .expect(400)
-      .then(({body:{msg}}) => {
+      .then(({ body: { msg } }) => {
         expect(msg).toBe('Invalid id')
+      })
+  })
+  test('201: POST request responds with comment object', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'mallionaire', body: 'The best game ever!' })
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toEqual({
+          comment_id: 7,
+          body: 'The best game ever!',
+          votes: 0,
+          author: 'mallionaire',
+          review_id: 1,
+          created_at: expect.any(String)
+        })
+      })
+  })
+  test('404: POST request with an id out of range', () => {
+    return request(app)
+      .post('/api/reviews/10000/comments')
+      .send({ username: 'mallionaire', body: 'The best game ever!' })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Review not found')
+      })
+  })
+  test('400: POST request with a username that does not exist', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'Erin', body: 'The best game ever!' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Key (author)=(Erin) is not present in table "users".')
+      })
+  })
+  test('400: POST request with invalid id', () => {
+    return request(app)
+      .post('/api/reviews/bananas/comments')
+      .send({ username: 'mallionaire', body: 'The best game ever!' })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid id')
+      })
+  })
+  test('400: POST request with empty object (or missing username/body)', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({})
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Missing key information from body")
       })
   })
 })

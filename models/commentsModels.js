@@ -12,3 +12,18 @@ exports.selectComments = (reviewId) => {
         return res.rows
     })
 }
+
+exports.insertComment = (newComment, reviewId) => {
+    const {username, body} = newComment
+    return selectReview(reviewId)
+    .then(() => {
+    return db.query(
+        `INSERT INTO comments
+        (body, author, review_id)
+        VALUES
+        ($1, $2, $3)
+        RETURNING *;`, [body, username, reviewId]
+    )}).then(res => {
+        return res.rows[0]
+    })
+}
