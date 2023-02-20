@@ -18,3 +18,5 @@ exports.selectReview = (reviewId) => {
         if (!res.rowCount) return Promise.reject({status: 404, msg: "Review not found"})
         return res.rows[0]})
 }
+
+
