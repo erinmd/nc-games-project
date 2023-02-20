@@ -1,7 +1,8 @@
 const {selectReviews, selectReview} = require('../models/reviewsModel')
 
 exports.getReviews = (req, res, next) => {
-    return selectReviews()
+    const {category} = req.query
+    return selectReviews(category)
         .then(reviews => res.status(200).send({reviews}))
         .catch(err => next(err))
 }

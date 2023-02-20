@@ -207,4 +207,25 @@ describe('api', () => {
         expect(msg).toBe('Missing key information from body')
       })
   })
+  test('200: GET request returns reviews filtered by given category', () => {
+    return request(app)
+      .get('/api/reviews?category=euro+game')
+      .expect(200)
+      .then(({ body: { reviews } }) => {
+        expect(reviews).toHaveLength(1)
+        expect(reviews[0]).toMatchObject({
+          owner: 'mallionaire',
+          title: 'Agricola',
+          review_id: expect.any(Number),
+          category: 'euro game',
+          review_img_url:  'https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700',
+          created_at: expect.any(String),
+          votes: 1,
+          designer: expect.any(String),
+          comment_count: expect.any(Number)
+        })
+
+        expect(reviews).toBeSortedBy('created_at', { descending: true })
+      })
+  })
 })
