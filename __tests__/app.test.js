@@ -30,7 +30,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('api', () => {
+  describe('api', () => {
     test('200: GET request responds with JSON describing all endpoints', () => {
       return request(app)
         .get('/api')
