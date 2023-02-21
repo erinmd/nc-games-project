@@ -91,9 +91,18 @@ describe('api', () => {
             })
           })
       })
-      test('200: GET request returns empty array if no reviews with that category', () => {
+      test('200: GET request returns empty array if category doesnt exist', () => {
         return request(app)
           .get('/api/reviews?category=cat_that_doesnt_exist')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toBeInstanceOf(Array)
+            expect(reviews).toHaveLength(0)
+          })
+      })
+      test('200: GET request returns empty array if no reviews with that category', () => {
+        return request(app)
+          .get("/api/reviews?category=children's+games")
           .expect(200)
           .then(({ body: { reviews } }) => {
             expect(reviews).toBeInstanceOf(Array)
