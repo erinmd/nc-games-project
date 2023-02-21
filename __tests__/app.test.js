@@ -467,3 +467,25 @@ describe('api', () => {
     })
   })
 })
+
+
+describe.only('deleteComment', () => {
+  test('204: returns no content', () => {
+    return request(app)
+      .delete('/api/comments/2')
+      .expect(204)
+  })
+  test('404: returns comment_id not found, if it does not exist', () => {
+    return request(app)
+    .delete('/api/comments/100')
+    .expect(404)
+    .then(({body:{msg}}) => expect(msg).toBe('comment_id not found'))
+  })
+  test('400: returns invalid request', () => {
+    return request(app)
+    .delete('/api/comments/invalid')
+    .expect(400)
+    .then(({body:{msg}}) => expect(msg).toBe('Invalid request'))
+  })
+
+})
