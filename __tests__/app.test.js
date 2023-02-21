@@ -16,6 +16,17 @@ afterAll(() => {
   return db.end()
 })
 
+describe('404: valid but non-existent path', () => {
+  test('404: any non-existent path request responds with Path not found', () => {
+    return request(app)
+      .get('/api/path_that_doesnt_exist')
+      .expect(404)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe("Path not found")
+      })
+  })
+})
+
 describe('api', () => {
   test('200: GET request responds with array of category objects', () => {
     return request(app)
@@ -80,12 +91,12 @@ describe('api', () => {
         expect(msg).toBe('Review not found')
       })
   })
-  test('400: GET request with invalid id returns bad request', () => {
+  test('400: GET request with Invalid request returns bad request', () => {
     return request(app)
       .get('/api/reviews/bananas')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid id')
+        expect(msg).toBe('Invalid request')
       })
   })
   test('200: GET request responds with an array of comments', () => {
@@ -124,12 +135,22 @@ describe('api', () => {
         expect(comments).toHaveLength(0)
       })
   })
-  test('400: GET request with invalid id returns bad request', () => {
+  test('400: GET request with Invalid request returns bad request', () => {
     return request(app)
       .get('/api/reviews/bananas/comments')
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid id')
+        expect(msg).toBe('Invalid request')
+      })
+  })
+  
+  test('400: GET request with Invalid request returns bad request', () => {
+    return request(app)
+      .patch('/api/reviews/bananas')
+      .send({ inc_votes: 2 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid request')
       })
   })
   test('201: POST request responds with comment object', () => {
@@ -148,14 +169,12 @@ describe('api', () => {
         })
       })
   })
-  test('201: POST request responds with comment object including extra properties, updating valid ones and ignoring invalid extras', () => {
+  test('201: POST request responds with comment object ignoring extra properties', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({
         username: 'mallionaire',
         body: 'The best game ever!',
-        votes: 1,
-        created_at: new Date(1610964101252),
         extra: 'ignored!'
       })
       .expect(201)
@@ -163,7 +182,7 @@ describe('api', () => {
         expect(comment).toEqual({
           comment_id: 7,
           body: 'The best game ever!',
-          votes: 1,
+          votes: 0,
           author: 'mallionaire',
           review_id: 1,
           created_at: expect.any(String)
@@ -177,25 +196,25 @@ describe('api', () => {
       .send({ username: 'mallionaire', body: 'The best game ever!' })
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Review not found')
+        expect(msg).toBe('Key (review_id)=(10000) is not present in table "reviews".')
       })
   })
-  test('400: POST request with a username that does not exist', () => {
+  test('404: POST request with a username that does not exist', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'Erin', body: 'The best game ever!' })
-      .expect(400)
+      .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe('Key (author)=(Erin) is not present in table "users".')
       })
   })
-  test('400: POST request with invalid id', () => {
+  test('400: POST request with Invalid request', () => {
     return request(app)
       .post('/api/reviews/bananas/comments')
       .send({ username: 'mallionaire', body: 'The best game ever!' })
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Invalid id')
+        expect(msg).toBe('Invalid request')
       })
   })
   test('400: POST request with empty object (or missing username/body)', () => {
@@ -205,6 +224,91 @@ describe('api', () => {
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe('Missing key information from body')
+      })
+  })
+  test('201 PATCH request responds with updated review with incremented votes', () => {
+    return request(app)
+      .patch('/api/reviews/2')
+      .send({ inc_votes: 2 })
+      .then(({ body: { review } }) => {
+        expect(review).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 7
+        })
+      })
+  })
+  test('201 PATCH request responds with updated review with decremented votes', () => {
+    return request(app)
+      .patch('/api/reviews/2')
+      .send({ inc_votes: -2 })
+      .then(({ body: { review } }) => {
+        expect(review).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 3
+        })
+      })
+  })
+  test('404: PATCH request responds with review id not found', () => {
+    return request(app)
+      .patch('/api/reviews/1000')
+      .send({ inc_votes: 2 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('review_id not found')
+      })
+  })
+  test('400: PATCH request responds with missing key', () => {
+    return request(app)
+      .patch('/api/reviews/1')
+      .send({})
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Missing key information from body')
+      })
+  })
+  test('400: Patch request with invalid data-type for increment', () => {
+    return request(app)
+      .patch('/api/reviews/1')
+      .send({ inc_votes: "kev" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Invalid request')
+      })
+  })
+  test('200 PATCH request responds with updated review, ignoring extra keys', () => {
+    return request(app)
+      .patch('/api/reviews/2')
+      .send({ inc_votes: -2, another_key: 'hello' })
+      .expect(200)
+      .then(({ body: { review } }) => {
+        expect(review).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://images.pexels.com/photos/4473494/pexels-photo-4473494.jpeg?w=700&h=700',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 3
+        })
       })
   })
 })
