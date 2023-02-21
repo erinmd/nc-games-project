@@ -11,11 +11,16 @@ exports.handleCustomError = (err, req, res, next) => {
 }
 
 exports.handlePsqlError = (err, req, res, next) => {
+  
     if (err.code === '22P02') {
-        res.status(400).send({msg:"Invalid id"})
+        res.status(400).send({msg:"Invalid request"})
     }  else if (err.code === '23503') {
-        res.status(400).send({msg:err.detail})
+        res.status(404).send({msg:err.detail})
     }  else if (err.code === '23502') {
         res.status(400).send({msg: "Missing key information from body"})
     } else next(err)
+}
+
+exports.handle404PathError = (req, res, next) => {
+    res.status(404).send({msg: "Path not found"})
 }
