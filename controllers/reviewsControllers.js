@@ -1,4 +1,5 @@
-const {selectReviews, selectReview} = require('../models/reviewsModel')
+const { checkExists } = require('../models/checkExists')
+const {selectReviews, selectReview, updateReview} = require('../models/reviewsModel')
 
 exports.getReviews = (req, res, next) => {
     const {category, sort_by} = req.query
@@ -14,3 +15,12 @@ exports.getReview = (req, res, next) => {
         .catch(err => next(err))
 }
 
+exports.patchReview = (req, res, next) => {
+    const {review_id} = req.params
+    const {inc_votes} = req.body
+    const checkReviewIdPromise = checkExists('reviews', 'review_id', review_id)
+    const updateReviewPromise = updateReview(review_id, inc_votes)
+    return Promise.all([updateReviewPromise, checkReviewIdPromise])
+        .then(([review]) => res.status(200).send({review}))
+        .catch(err => next(err))
+}

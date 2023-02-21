@@ -23,13 +23,31 @@ exports.selectReviews = (category, sort_by = 'created_at') => {
     ).then(({rows})=> rows)
 }
 
-exports.selectReview = (reviewId) => {
-    return db.query(
-        `SELECT * FROM reviews
-         WHERE review_id = $1`, [reviewId]
-    ).then((res) => {
-        if (!res.rowCount) return Promise.reject({status: 404, msg: "Review not found"})
-        return res.rows[0]})
+exports.selectReview = reviewId => {
+  return db
+    .query(
+      `SELECT * FROM reviews
+         WHERE review_id = $1`,
+      [reviewId]
+    )
+    .then(res => {
+      if (!res.rowCount)
+        return Promise.reject({ status: 404, msg: 'Review not found' })
+      return res.rows[0]
+    })
 }
 
+exports.updateReview = (reviewId, voteInc) => {
+  return db
+    .query(
+      `UPDATE reviews
+         SET votes = votes + $1
+         WHERE review_id = $2
+         RETURNING *`,
+      [voteInc, reviewId]
+    )
 
+    .then(res => {
+      return res.rows[0]
+    })
+}
