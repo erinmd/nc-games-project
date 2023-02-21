@@ -16,6 +16,17 @@ afterAll(() => {
   return db.end()
 })
 
+describe('404: valid but non-existent path', () => {
+  test('404: any non-existent path request responds with Path not found', () => {
+    return request(app)
+      .get('/api/path_that_doesnt_exist')
+      .expect(404)
+      .then(({body:{msg}}) => {
+        expect(msg).toBe("Path not found")
+      })
+  })
+})
+
 describe('api', () => {
   test('200: GET request responds with array of category objects', () => {
     return request(app)
@@ -185,14 +196,14 @@ describe('api', () => {
       .send({ username: 'mallionaire', body: 'The best game ever!' })
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Review not found')
+        expect(msg).toBe('Key (review_id)=(10000) is not present in table "reviews".')
       })
   })
-  test('400: POST request with a username that does not exist', () => {
+  test('404: POST request with a username that does not exist', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'Erin', body: 'The best game ever!' })
-      .expect(400)
+      .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe('Key (author)=(Erin) is not present in table "users".')
       })
@@ -259,7 +270,7 @@ describe('api', () => {
       .send({ inc_votes: 2 })
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Review not found')
+        expect(msg).toBe('review_id not found')
       })
   })
   test('400: PATCH request responds with missing key', () => {
@@ -280,10 +291,11 @@ describe('api', () => {
         expect(msg).toBe('Invalid request')
       })
   })
-  test('201 PATCH request responds with updated review, ignoring extra keys', () => {
+  test('200 PATCH request responds with updated review, ignoring extra keys', () => {
     return request(app)
       .patch('/api/reviews/2')
       .send({ inc_votes: -2, another_key: 'hello' })
+      .expect(200)
       .then(({ body: { review } }) => {
         expect(review).toEqual({
           review_id: 2,

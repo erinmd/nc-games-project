@@ -1,7 +1,7 @@
 const express = require('express')
 const {getCategories} = require('./controllers/categoryControllers')
 const {getReviews, getReview, patchReview} = require('./controllers/reviewsControllers')
-const { handle500Error, handleCustomError, handlePsqlError } = require('./controllers/error-handlers')
+const { handle500Error, handleCustomError, handlePsqlError, handle404PathError } = require('./controllers/error-handlers')
 const {getComments, postComment} = require('./controllers/commentsControllers.js')
 
 const app = express()
@@ -17,6 +17,7 @@ app.patch('/api/reviews/:review_id', patchReview)
 
 app.post('/api/reviews/:review_id/comments', postComment)
 
+app.use(handle404PathError)
 app.use(handleCustomError)
 app.use(handlePsqlError)
 app.use(handle500Error)

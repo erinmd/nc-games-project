@@ -27,28 +27,16 @@ exports.selectReview = reviewId => {
 }
 
 exports.updateReview = (reviewId, voteInc) => {
-  return this.selectReview(reviewId)
-    .then(() => {
-      return db.query(
-        `UPDATE reviews
+  return db
+    .query(
+      `UPDATE reviews
          SET votes = votes + $1
          WHERE review_id = $2
          RETURNING *`,
-        [voteInc, reviewId]
-      )
-    })
+      [voteInc, reviewId]
+    )
+
     .then(res => {
       return res.rows[0]
     })
 }
-
-exports.selectReview = (reviewId) => {
-    return db.query(
-        `SELECT * FROM reviews
-         WHERE review_id = $1`, [reviewId]
-    ).then((res) => {
-        if (!res.rowCount) return Promise.reject({status: 404, msg: "Review not found"})
-        return res.rows[0]})
-}
-
-
