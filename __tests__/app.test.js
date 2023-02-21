@@ -200,7 +200,8 @@ describe('api', () => {
             review_body: 'Fiddly fun for all the family',
             category: 'dexterity',
             created_at: '2021-01-18T10:01:41.251Z',
-            votes: 5
+            votes: 5,
+            comment_count: 3
           })
         })
     })
