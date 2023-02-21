@@ -32,8 +32,11 @@ exports.selectReviews = (category, sort_by = 'created_at', order_by = 'desc') =>
 exports.selectReview = reviewId => {
   return db
     .query(
-      `SELECT * FROM reviews
-         WHERE review_id = $1`,
+      `SELECT reviews.*, CAST(COUNT(comment_id) AS INT) AS comment_count  FROM reviews
+      LEFT JOIN comments ON reviews.review_id = comments.review_id
+      GROUP BY owner, title, reviews.review_id, category, review_img_url,
+      reviews.created_at, reviews.votes, designer, review_body
+      HAVING reviews.review_id = $1`,
       [reviewId]
     )
     .then(res => {
