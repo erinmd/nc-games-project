@@ -21,8 +21,8 @@ describe('404: valid but non-existent path', () => {
     return request(app)
       .get('/api/path_that_doesnt_exist')
       .expect(404)
-      .then(({body:{msg}}) => {
-        expect(msg).toBe("Path not found")
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Path not found')
       })
   })
 })
@@ -143,7 +143,7 @@ describe('api', () => {
         expect(msg).toBe('Invalid request')
       })
   })
-  
+
   test('400: GET request with Invalid request returns bad request', () => {
     return request(app)
       .patch('/api/reviews/bananas')
@@ -196,7 +196,9 @@ describe('api', () => {
       .send({ username: 'mallionaire', body: 'The best game ever!' })
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe('Key (review_id)=(10000) is not present in table "reviews".')
+        expect(msg).toBe(
+          'Key (review_id)=(10000) is not present in table "reviews".'
+        )
       })
   })
   test('404: POST request with a username that does not exist', () => {
@@ -226,6 +228,7 @@ describe('api', () => {
         expect(msg).toBe('Missing key information from body')
       })
   })
+
   test('201 PATCH request responds with updated review with incremented votes', () => {
     return request(app)
       .patch('/api/reviews/2')
@@ -285,7 +288,7 @@ describe('api', () => {
   test('400: Patch request with invalid data-type for increment', () => {
     return request(app)
       .patch('/api/reviews/1')
-      .send({ inc_votes: "kev" })
+      .send({ inc_votes: 'kev' })
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe('Invalid request')
@@ -308,6 +311,21 @@ describe('api', () => {
           category: 'dexterity',
           created_at: '2021-01-18T10:01:41.251Z',
           votes: 3
+        })
+      })
+  })
+  test('200: GET request responds with array of users', () => {
+    return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users).toHaveLength(4)
+        users.forEach(user => {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String)
+          })
         })
       })
   })
