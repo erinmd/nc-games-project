@@ -1,5 +1,5 @@
 const db = require('../db/connection.js')
-exports.selectReviews = (category, sort_by = 'created_at') => {
+exports.selectReviews = (category, sort_by = 'created_at', order_by = 'desc') => {
     let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, designer, CAST(COUNT(comment_id) AS INT) AS comment_count
     FROM reviews
     LEFT JOIN comments ON reviews.review_id = comments.review_id
@@ -13,11 +13,17 @@ exports.selectReviews = (category, sort_by = 'created_at') => {
 
     const validSortBys = ['owner', 'title', 'review_id', 'category', 'review_img_url',
                            'created_at', 'votes', 'designer']
-    if (!validSortBys.includes(sort_by)) sort_by = 'created_at'
+    if (!validSortBys.includes(sort_by)) {
+        return Promise.reject({status: 400, msg: "Invalid key to sort by"})
+    }
+
+    if(!['asc', 'desc'].includes(order_by)){
+        return Promise.reject({status: 400, msg: "Invalid order by"})
+    }
 
     queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
-    ORDER BY ${sort_by} DESC`
+    ORDER BY ${sort_by} ${order_by}`
 
     return db.query(queryString, queryParams      
     ).then(({rows})=> rows)

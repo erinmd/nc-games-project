@@ -43,82 +43,135 @@ describe('api', () => {
           })
         })
     })
-
-    test('200: GET request returns reviews filtered by given category', () => {
-      return request(app)
-        .get('/api/reviews?category=euro+game')
-        .expect(200)
-        .then(({ body: { reviews } }) => {
-          expect(reviews).toHaveLength(1)
-          expect(reviews[0]).toMatchObject({
-            owner: 'mallionaire',
-            title: 'Agricola',
-            review_id: expect.any(Number),
-            category: 'euro game',
-            review_img_url:
-              'https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700',
-            created_at: expect.any(String),
-            votes: 1,
-            designer: expect.any(String),
-            comment_count: expect.any(Number)
-          })
-        })
-    })
-    test('200: GET request returns empty array if no reviews with that category', () => {
-      return request(app)
-        .get('/api/reviews?category=cat_that_doesnt_exist')
-        .expect(200)
-        .then(({ body: { reviews } }) => {
-          expect(reviews).toBeInstanceOf(Array)
-          expect(reviews).toHaveLength(0)
-        })
-    })
-    test('200: GET request responds with array of review objects sorted by sort_by query', () => {
-      return request(app)
-        .get('/api/reviews?sort_by=owner')
-        .expect(200)
-        .then(({ body: { reviews } }) => {
-          expect(reviews).toHaveLength(13)
-          reviews.forEach(review =>
-            expect(review).toMatchObject({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              designer: expect.any(String),
-              comment_count: expect.any(Number)
-            })
-          )
-          expect(reviews).toBeSortedBy('owner', { descending: true })
-        })
-    })
   })
 
   describe('getReviews', () => {
-    test('200: GET request responds with array of review objects', () => {
-      return request(app)
-        .get('/api/reviews')
-        .expect(200)
-        .then(({ body: { reviews } }) => {
-          expect(reviews).toHaveLength(13)
-          reviews.forEach(review =>
-            expect(review).toMatchObject({
-              owner: expect.any(String),
-              title: expect.any(String),
+    describe('no query', () => {
+      test('200: GET request responds with array of review objects', () => {
+        return request(app)
+          .get('/api/reviews')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(13)
+            reviews.forEach(review =>
+              expect(review).toMatchObject({
+                owner: expect.any(String),
+                title: expect.any(String),
+                review_id: expect.any(Number),
+                category: expect.any(String),
+                review_img_url: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                designer: expect.any(String),
+                comment_count: expect.any(Number)
+              })
+            )
+            expect(reviews).toBeSortedBy('created_at', { descending: true })
+          })
+      })
+    })
+    describe('category query', () => {
+      test('200: GET request returns reviews filtered by given category', () => {
+        return request(app)
+          .get('/api/reviews?category=euro+game')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(1)
+            expect(reviews[0]).toMatchObject({
+              owner: 'mallionaire',
+              title: 'Agricola',
               review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
+              category: 'euro game',
+              review_img_url:
+                'https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700',
               created_at: expect.any(String),
-              votes: expect.any(Number),
+              votes: 1,
               designer: expect.any(String),
               comment_count: expect.any(Number)
             })
-          )
-          expect(reviews).toBeSortedBy('created_at', { descending: true })
-        })
+          })
+      })
+      test('200: GET request returns empty array if no reviews with that category', () => {
+        return request(app)
+          .get('/api/reviews?category=cat_that_doesnt_exist')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toBeInstanceOf(Array)
+            expect(reviews).toHaveLength(0)
+          })
+      })
+    })
+    describe('sort_by query', () => {
+      test('200: GET request responds with array of review objects sorted by sort_by query', () => {
+        return request(app)
+          .get('/api/reviews?sort_by=owner')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(13)
+            reviews.forEach(review =>
+              expect(review).toMatchObject({
+                owner: expect.any(String),
+                title: expect.any(String),
+                review_id: expect.any(Number),
+                category: expect.any(String),
+                review_img_url: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                designer: expect.any(String),
+                comment_count: expect.any(Number)
+              })
+            )
+            expect(reviews).toBeSortedBy('owner', { descending: true })
+          })
+      })
+      test('400: GET request with invalid sort_by returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?sort_by=invalid_key')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid key to sort by')
+          })
+      })
+    })
+    describe('order_by query', () => {
+      test('200: GET request with order_by returns ascending list', () => {
+        return request(app)
+          .get('/api/reviews?order_by=asc')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toBeSortedBy('created_at')
+          })
+      })
+      test('400: GET request with invalid order_by returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?order_by=invalid')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid order by')
+          })
+      })
+    })
+    describe('multiple queries', () => {
+      test('200: returns a list sorted and ordered', () => {
+        return request(app)
+          .get('/api/reviews?order_by=asc&sort_by=owner')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toBeSortedBy('owner')
+          })
+      })
+      test('200: returns a sorted, ordered and filtered list', () => {
+        return request(app)
+          .get('/api/reviews?order_by=desc&sort_by=title&category=social+deduction')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(11)
+            reviews.forEach(review => {
+              expect(review.category).toBe('social deduction')
+            })
+            expect(reviews).toBeSortedBy('title', {descending:true})
+          })
+      })
     })
   })
 
