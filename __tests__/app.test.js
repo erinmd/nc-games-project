@@ -16,7 +16,9 @@ afterAll(() => {
   return db.end()
 })
 
-describe('api', () => {
+describe('app', () => {
+
+  
   describe('Valid but non-existent path', () => {
     test('404: any non-existent path request responds with Path not found', () => {
       return request(app)
@@ -24,6 +26,36 @@ describe('api', () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe('Path not found')
+        })
+    })
+  })
+
+  describe.only('api', () => {
+    test('200: GET request responds with JSON describing all endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body:{endpoints}}) => {
+          endpointsObject = JSON.parse(endpoints)
+          expect(endpointsObject).toBeInstanceOf(Object)
+          expect(endpointsObject).toHaveProperty('GET /api')
+          expect(endpointsObject).toHaveProperty('GET /api/categories')
+          expect(endpointsObject).toHaveProperty('GET /api/reviews')
+          expect(endpointsObject).toHaveProperty('GET /api/reviews/:review_id')
+          expect(endpointsObject).toHaveProperty('GET /api/users')
+          expect(endpointsObject).toHaveProperty('PATCH /api/reviews/:review_id')
+          expect(endpointsObject).toHaveProperty('POST /api/reviews/:review_id/comments')
+          expect(endpointsObject).toHaveProperty('DELETE /api/comments/:comment_id')
+          for (const endpoint in endpointsObject){
+            expect(endpointsObject[endpoint]).toHaveProperty("description")
+            if (endpoint.startsWith('GET /api/')){
+              expect(endpointsObject[endpoint]).toHaveProperty("exampleResponse")
+              expect(endpointsObject[endpoint]).toHaveProperty("queries")
+            }
+            if(endpoint.startsWith('POST') || endpoint.startsWith('PATCH')){
+              expect(endpointsObject[endpoint]).toHaveProperty('exampleRequestBody')
+            }
+          }
         })
     })
   })
@@ -171,14 +203,16 @@ describe('api', () => {
       })
       test('200: returns a sorted, ordered and filtered list', () => {
         return request(app)
-          .get('/api/reviews?order_by=desc&sort_by=title&category=social+deduction')
+          .get(
+            '/api/reviews?order_by=desc&sort_by=title&category=social+deduction'
+          )
           .expect(200)
           .then(({ body: { reviews } }) => {
             expect(reviews).toHaveLength(11)
             reviews.forEach(review => {
               expect(review.category).toBe('social deduction')
             })
-            expect(reviews).toBeSortedBy('title', {descending:true})
+            expect(reviews).toBeSortedBy('title', { descending: true })
           })
       })
     })
@@ -466,26 +500,22 @@ describe('api', () => {
         })
     })
   })
-})
 
-
-describe.only('deleteComment', () => {
-  test('204: returns no content', () => {
-    return request(app)
-      .delete('/api/comments/2')
-      .expect(204)
+  describe('deleteComment', () => {
+    test('204: returns no content', () => {
+      return request(app).delete('/api/comments/2').expect(204)
+    })
+    test('404: returns comment_id not found, if it does not exist', () => {
+      return request(app)
+        .delete('/api/comments/100')
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe('comment_id not found'))
+    })
+    test('400: returns invalid request', () => {
+      return request(app)
+        .delete('/api/comments/invalid')
+        .expect(400)
+        .then(({ body: { msg } }) => expect(msg).toBe('Invalid request'))
+    })
   })
-  test('404: returns comment_id not found, if it does not exist', () => {
-    return request(app)
-    .delete('/api/comments/100')
-    .expect(404)
-    .then(({body:{msg}}) => expect(msg).toBe('comment_id not found'))
-  })
-  test('400: returns invalid request', () => {
-    return request(app)
-    .delete('/api/comments/invalid')
-    .expect(400)
-    .then(({body:{msg}}) => expect(msg).toBe('Invalid request'))
-  })
-
 })
