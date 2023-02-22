@@ -519,3 +519,20 @@ describe('app', () => {
     })
   })
 })
+
+describe.skip('patchComment', () => {
+  test('200: returns updated comment with updated votes', () => {
+    return request(app)
+      .patch('/api/comments/3').send({inc_votes: 3})
+      .expect(200)
+      .then(({body:{comment}})=> {
+        expect(comment).toEqual({
+          body: "I didn't know dogs could play games",
+          votes: 13,
+          author: 'philippaclaire9',
+          review_id: 3,
+          created_at: new Date(1610964588110),
+        })
+      })
+  })
+})
