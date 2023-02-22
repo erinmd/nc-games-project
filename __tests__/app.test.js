@@ -29,7 +29,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('api', () => {
+  describe('api', () => {
     test('200: GET request responds with JSON describing all endpoints', () => {
       return request(app)
         .get('/api')
@@ -59,7 +59,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('getCategories', () => {
+  describe('getCategories', () => {
     test('200: GET request responds with array of category objects', () => {
       return request(app)
         .get('/api/categories')
