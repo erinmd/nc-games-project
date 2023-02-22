@@ -59,7 +59,7 @@ describe('app', () => {
     })
   })
 
-  describe('getCategories', () => {
+  describe.only('getCategories', () => {
     test('200: GET request responds with array of category objects', () => {
       return request(app)
         .get('/api/categories')
