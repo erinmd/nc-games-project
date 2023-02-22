@@ -170,7 +170,6 @@ describe('app', () => {
                   comment_count: expect.any(Number)
                 })
               )
-              
             )
             expect(reviews).toBeSortedBy('owner', { descending: true })
           })
@@ -270,6 +269,18 @@ describe('app', () => {
           })
       })
     })
+    describe('total_count property added to returned object', () => {
+      test('200: returned with total_count property', () => {
+        return request(app)
+          .get('/api/reviews')
+          .expect(200)
+          .then(({ body: {reviews} }) => {
+            reviews.forEach(review => {
+              expect(review).toHaveProperty('total_count', 13)
+            })
+          })
+      })
+    })
     describe('multiple queries', () => {
       test('200: returns a list sorted and ordered', () => {
         return request(app)
@@ -291,6 +302,17 @@ describe('app', () => {
               expect(review.category).toBe('social deduction')
             })
             expect(reviews).toBeSortedBy('title', { descending: true })
+          })
+      })
+      test('200: returns page 3 of a filtered, limited list with total_count', () => {
+        return request(app)
+          .get('/api/reviews?category=social+deduction&limit=3&p=3&sort_by=review_id&order_by=asc')
+          .expect(200)
+          .then(({body:{reviews}}) => {
+            expect(reviews).toHaveLength(3)
+            const firstReview = reviews[0]
+            expect(firstReview.total_count).toBe(11)
+            expect(firstReview.review_id).toBe(9)
           })
       })
     })
