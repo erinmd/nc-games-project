@@ -1,5 +1,5 @@
 const { checkExists } = require('../models/checkExists')
-const { selectComments, insertComment, removeComment} = require('../models/commentsModels')
+const { selectComments, insertComment, removeComment, updateComment} = require('../models/commentsModels')
 
 exports.getComments = (req, res, next) => {
   const { review_id } = req.params
@@ -22,4 +22,12 @@ exports.deleteComment = (req, res, next) => {
   return Promise.all([removeCommentPromise, checkCommentExistsPromise])
   .then(() => res.status(204).send())
   .catch(err => next(err))
+}
+
+exports.patchComment = (req, res, next) => {
+  const {comment_id} = req.params
+  const {inc_votes} = req.body
+  return updateComment(comment_id, inc_votes)
+    .then((comment) => res.status(200).send({comment}))
+    .catch(err => next(err))
 }
