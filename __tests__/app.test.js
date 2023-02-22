@@ -17,7 +17,6 @@ afterAll(() => {
 })
 
 describe('app', () => {
-
   describe('Valid but non-existent path', () => {
     test('404: any non-existent path request responds with Path not found', () => {
       return request(app)
@@ -34,7 +33,7 @@ describe('app', () => {
       return request(app)
         .get('/api')
         .expect(200)
-        .then(({body:{endpoints}}) => {
+        .then(({ body: { endpoints } }) => {
           endpointsObject = JSON.parse(endpoints)
           expect(endpointsObject).toBeInstanceOf(Object)
           expect(endpointsObject).toHaveProperty('GET /api')
@@ -42,17 +41,27 @@ describe('app', () => {
           expect(endpointsObject).toHaveProperty('GET /api/reviews')
           expect(endpointsObject).toHaveProperty('GET /api/reviews/:review_id')
           expect(endpointsObject).toHaveProperty('GET /api/users')
-          expect(endpointsObject).toHaveProperty('PATCH /api/reviews/:review_id')
-          expect(endpointsObject).toHaveProperty('POST /api/reviews/:review_id/comments')
-          expect(endpointsObject).toHaveProperty('DELETE /api/comments/:comment_id')
-          for (const endpoint in endpointsObject){
-            expect(endpointsObject[endpoint]).toHaveProperty("description")
-            if (endpoint.startsWith('GET /api/')){
-              expect(endpointsObject[endpoint]).toHaveProperty("exampleResponse")
-              expect(endpointsObject[endpoint]).toHaveProperty("queries")
+          expect(endpointsObject).toHaveProperty(
+            'PATCH /api/reviews/:review_id'
+          )
+          expect(endpointsObject).toHaveProperty(
+            'POST /api/reviews/:review_id/comments'
+          )
+          expect(endpointsObject).toHaveProperty(
+            'DELETE /api/comments/:comment_id'
+          )
+          for (const endpoint in endpointsObject) {
+            expect(endpointsObject[endpoint]).toHaveProperty('description')
+            if (endpoint.startsWith('GET /api/')) {
+              expect(endpointsObject[endpoint]).toHaveProperty(
+                'exampleResponse'
+              )
+              expect(endpointsObject[endpoint]).toHaveProperty('queries')
             }
-            if(endpoint.startsWith('POST') || endpoint.startsWith('PATCH')){
-              expect(endpointsObject[endpoint]).toHaveProperty('exampleRequestBody')
+            if (endpoint.startsWith('POST') || endpoint.startsWith('PATCH')) {
+              expect(endpointsObject[endpoint]).toHaveProperty(
+                'exampleRequestBody'
+              )
             }
           }
         })
@@ -522,16 +531,39 @@ describe('app', () => {
 describe.skip('patchComment', () => {
   test('200: returns updated comment with updated votes', () => {
     return request(app)
-      .patch('/api/comments/3').send({inc_votes: 3})
+      .patch('/api/comments/3')
+      .send({ inc_votes: 3 })
       .expect(200)
-      .then(({body:{comment}})=> {
+      .then(({ body: { comment } }) => {
         expect(comment).toEqual({
           body: "I didn't know dogs could play games",
           votes: 13,
           author: 'philippaclaire9',
           review_id: 3,
-          created_at: new Date(1610964588110),
+          created_at: new Date(1610964588110)
         })
       })
+  })
+
+  describe('getUser', () => {
+    test('200: returns user', () => {
+      return request(app)
+        .get('/api/users/bainesface')
+        .expect(200)
+        .then(({ body: { user } }) => {
+          expect(user).toHaveProperty('username', 'bainesface')
+          expect(user).toHaveProperty('name', 'sarah')
+          expect(user).toHaveProperty(
+            'avatar_url',
+            'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
+          )
+        })
+    })
+    test('404: returns username not found', () => {
+      return request(app)
+        .get('/api/users/fake-user')
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe('User not found'))
+    })
   })
 })
