@@ -518,3 +518,22 @@ describe('app', () => {
     })
   })
 })
+
+describe('getUser', () => {
+  test('200: returns user', () => {
+    return request(app)
+      .get('/api/users/bainesface')
+      .expect(200)
+      .then(({body:{user}}) => {
+        expect(user).toHaveProperty('username', 'bainesface')
+        expect(user).toHaveProperty('name', 'sarah')
+        expect(user).toHaveProperty('avatar_url', 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4')
+      })
+  })
+  test('404: returns username not found', () => {
+    return request(app)
+    .get('/api/users/fake-user')
+    .expect(404)
+    .then(({body:{msg}}) => expect(msg).toBe('User not found'))
+  })
+})
