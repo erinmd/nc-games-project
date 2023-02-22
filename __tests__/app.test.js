@@ -527,7 +527,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('patchComment', () => {
+  describe('patchComment', () => {
     test('200: returns updated comment with updated votes', () => {
       return request(app)
         .patch('/api/comments/3')
@@ -608,6 +608,133 @@ describe('app', () => {
         .get('/api/users/fake-user')
         .expect(404)
         .then(({ body: { msg } }) => expect(msg).toBe('User not found'))
+    })
+  })
+
+  describe('postReview', () => {
+    test('200: returns new review', () => {
+      return request(app)
+        .post('/api/reviews')
+        .send({
+          owner: 'philippaclaire9',
+          title: 'Takenoko',
+          review_body: 'Fun with pandas!',
+          designer: 'unknown',
+          category: 'dexterity',
+          review_img_url: 'https://fake-address.fake.com'
+        })
+        .expect(201)
+        .then(({ body: { review } }) => {
+          expect(review).toMatchObject({
+            review_id: 14,
+            title: 'Takenoko',
+            designer: 'unknown',
+            owner: 'philippaclaire9',
+            review_img_url: 'https://fake-address.fake.com',
+            review_body: 'Fun with pandas!',
+            category: 'dexterity',
+            created_at: expect.any(String),
+            votes: 0,
+            comment_count: 0
+          })
+        })
+    })
+    test('200: returns new review with default url', () => {
+      return request(app)
+        .post('/api/reviews')
+        .send({
+          owner: 'philippaclaire9',
+          title: 'Takenoko',
+          review_body: 'Fun with pandas!',
+          designer: 'unknown',
+          category: 'dexterity',
+        })
+        .expect(201)
+        .then(({ body: { review } }) => {
+          expect(review).toMatchObject({
+            review_id: 14,
+            title: 'Takenoko',
+            designer: 'unknown',
+            owner: 'philippaclaire9',
+            review_img_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
+            review_body: 'Fun with pandas!',
+            category: 'dexterity',
+            created_at: expect.any(String),
+            votes: 0,
+            comment_count: 0
+          })
+        })
+    })
+    test('200: returns new review, ignoring extra properties', () => {
+      return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'philippaclaire9',
+        title: 'Takenoko',
+        review_body: 'Fun with pandas!',
+        designer: 'unknown',
+        category: 'dexterity',
+        something_else: 'test'
+      })
+      .expect(201)
+      .then(({ body: { review } }) => {
+        expect(review).toMatchObject({
+          review_id: 14,
+          title: 'Takenoko',
+          designer: 'unknown',
+          owner: 'philippaclaire9',
+          review_img_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
+          review_body: 'Fun with pandas!',
+          category: 'dexterity',
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 0
+        })
+      })
+    })
+    test('400: returns invalid request when any keys are missing', () => {
+      return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'philippaclaire9',
+        title: 'Takenoko',
+        review_body: 'Fun with pandas!',
+        designer: 'unknown',
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe('Missing key information from body')
+      })
+    })
+    test('404: returns category not found', () => {
+      return request(app)
+        .post('/api/reviews')
+        .send({
+          owner: 'philippaclaire9',
+          title: 'Takenoko',
+          review_body: 'Fun with pandas!',
+          designer: 'unknown',
+          category: 'panda fun',
+        })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Key (category)=(panda fun) is not present in table "categories".')
+        })
+    })
+    test('404: returns owner not found', () => {
+      return request(app)
+        .post('/api/reviews')
+        .send({
+          owner: 'Erin',
+          title: 'Takenoko',
+          review_body: 'Fun with pandas!',
+          designer: 'unknown',
+          category: 'dexterity',
+        })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Key (owner)=(Erin) is not present in table "users".')
+        })
     })
   })
 })

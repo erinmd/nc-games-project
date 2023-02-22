@@ -1,32 +1,43 @@
 const db = require('../db/connection.js')
-exports.selectReviews = (category, sort_by = 'created_at', order_by = 'desc') => {
-    let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, designer, CAST(COUNT(comment_id) AS INT) AS comment_count
+exports.selectReviews = (
+  category,
+  sort_by = 'created_at',
+  order_by = 'desc'
+) => {
+  let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, designer, CAST(COUNT(comment_id) AS INT) AS comment_count
     FROM reviews
     LEFT JOIN comments ON reviews.review_id = comments.review_id
     `
-    const queryParams = []
+  const queryParams = []
 
-    if (category) {
-        queryString += " WHERE reviews.category = $1"
-        queryParams.push(category)
-    }
+  if (category) {
+    queryString += ' WHERE reviews.category = $1'
+    queryParams.push(category)
+  }
 
-    const validSortBys = ['owner', 'title', 'review_id', 'category', 'review_img_url',
-                           'created_at', 'votes', 'designer']
-    if (!validSortBys.includes(sort_by)) {
-        return Promise.reject({status: 400, msg: "Invalid key to sort by"})
-    }
+  const validSortBys = [
+    'owner',
+    'title',
+    'review_id',
+    'category',
+    'review_img_url',
+    'created_at',
+    'votes',
+    'designer'
+  ]
+  if (!validSortBys.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: 'Invalid key to sort by' })
+  }
 
-    if(!['asc', 'desc'].includes(order_by)){
-        return Promise.reject({status: 400, msg: "Invalid order by"})
-    }
+  if (!['asc', 'desc'].includes(order_by)) {
+    return Promise.reject({ status: 400, msg: 'Invalid order by' })
+  }
 
-    queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
+  queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
     ORDER BY ${sort_by} ${order_by}`
 
-    return db.query(queryString, queryParams      
-    ).then(({rows})=> rows)
+  return db.query(queryString, queryParams).then(({ rows }) => rows)
 }
 
 exports.selectReview = reviewId => {
@@ -59,4 +70,23 @@ exports.updateReview = (reviewId, voteInc) => {
     .then(res => {
       return res.rows[0]
     })
+}
+
+exports.insertReview = newReview => {
+  const { owner, title, review_body, designer, category, review_img_url } =
+    newReview
+  const queryParams = [owner, title, review_body, designer, category]
+  let queryString = `INSERT INTO reviews
+                     (owner, title, review_body, designer, category`
+  if (review_img_url) {
+    queryString += `, review_img_url`
+    queryParams.push(review_img_url)
+  }
+  queryString += `) VALUES ($1, $2, $3, $4, $5`
+  if (review_img_url) queryString += `, $6`
+  queryString += `) RETURNING *`
+  return db.query(queryString, queryParams)
+  .then(({rows}) => {
+    return rows[0]
+  })
 }
