@@ -18,7 +18,6 @@ afterAll(() => {
 
 describe('app', () => {
 
-  
   describe('Valid but non-existent path', () => {
     test('404: any non-existent path request responds with Path not found', () => {
       return request(app)
@@ -30,7 +29,7 @@ describe('app', () => {
     })
   })
 
-  describe('api', () => {
+  describe.only('api', () => {
     test('200: GET request responds with JSON describing all endpoints', () => {
       return request(app)
         .get('/api')
