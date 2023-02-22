@@ -2,17 +2,17 @@
 
 ## Hosted version
 
-You can access the [hosted version here](https://nc-games-project-2obg.onrender.com/api/categories)
+You can access the [hosted version here](https://nc-games-project-2obg.onrender.com/api/)
 
-
+***
 ## Project summary
 
 An API used for accessing application data for board games programmatically. 
 
-
+***
 ##  Instructions to use
 ### Initial setup
-1. Clone the repo first
+1. Clone the repo
 2. Create a new GitHub repo, do not initialise the project with a readme, .gitignore or license.
 3. From your cloned local version of this project you'll want to push your code to your new repo using the following commands:
 ```
@@ -34,15 +34,15 @@ To initiate the database and seed, run the commands:
 npm run setup-dbs
 npm run seed
 ```
-
-### Run tests
+***
+## Run tests
 To run the tests use the command:
 ```
 npm test <filename>
 ```
 Or omit the filename to run all. The tests can be found in the `__tests__` directory
-
-## Versions used for project
+***
+## Versions used
 Node v19.6.0
 
 Postgres v14.6
