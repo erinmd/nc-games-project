@@ -19,10 +19,13 @@ exports.handlePsqlError = (err, req, res, next) => {
     }  else if (err.code === '23502') {
         res.status(400).send({msg: "Missing key information from body"})
     } else if (err.code === '2201W') {
-        res.status(400).send({msg: 'This query must not be negative'})
+        res.status(400).send({msg: 'Limit must not be negative'})
+    } else if (err.code === '2201X') {
+        res.status(400).send({msg: 'Page number must not be negative'})
     } else next(err)
 }
 
 exports.handle404PathError = (req, res, next) => {
     res.status(404).send({msg: "Path not found"})
 }
+

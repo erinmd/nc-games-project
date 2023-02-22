@@ -156,18 +156,21 @@ describe('app', () => {
           .get('/api/reviews?sort_by=owner')
           .expect(200)
           .then(({ body: { reviews } }) => {
-              reviews.forEach(review =>
-              expect(review).toMatchObject({
-                owner: expect.any(String),
-                title: expect.any(String),
-                review_id: expect.any(Number),
-                category: expect.any(String),
-                review_img_url: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                designer: expect.any(String),
-                comment_count: expect.any(Number)
-              })
+            reviews.forEach(review =>
+              expect(review).toEqual(
+                expect.objectContaining({
+                  owner: expect.any(String),
+                  title: expect.any(String),
+                  review_id: expect.any(Number),
+                  category: expect.any(String),
+                  review_img_url: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  designer: expect.any(String),
+                  comment_count: expect.any(Number)
+                })
+              )
+              
             )
             expect(reviews).toBeSortedBy('owner', { descending: true })
           })
@@ -204,7 +207,7 @@ describe('app', () => {
         return request(app)
           .get('/api/reviews?limit=3')
           .expect(200)
-          .then(({body: {reviews}}) => {
+          .then(({ body: { reviews } }) => {
             expect(reviews).toHaveLength(3)
           })
       })
@@ -221,18 +224,51 @@ describe('app', () => {
           .get('/api/reviews?limit=-1')
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe('This query must not be negative')
+            expect(msg).toBe('Limit must not be negative')
           })
       })
       test('200: GET request with limit larger than table', () => {
         return request(app)
           .get('/api/reviews?limit=300')
           .expect(200)
-          .then(({body: {reviews}}) => {
+          .then(({ body: { reviews } }) => {
             expect(reviews).toHaveLength(13)
           })
       })
-
+    })
+    describe('page query', () => {
+      test('200: returns second page', () => {
+        return request(app)
+          .get('/api/reviews?p=2')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(3)
+          })
+      })
+      test('200: returns empty array if no results on page', () => {
+        return request(app)
+          .get('/api/reviews?p=20')
+          .expect(200)
+          .then(({ body: { reviews } }) => {
+            expect(reviews).toHaveLength(0)
+          })
+      })
+      test('400: GET request with negative p returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?p=-1')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Page number must not be negative')
+          })
+      })
+      test('400: GET request with invalid p returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?p=invalid')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid request')
+          })
+      })
     })
     describe('multiple queries', () => {
       test('200: returns a list sorted and ordered', () => {
@@ -250,7 +286,7 @@ describe('app', () => {
           )
           .expect(200)
           .then(({ body: { reviews } }) => {
-            expect(reviews.length>1).toBe(true)
+            expect(reviews.length > 1).toBe(true)
             reviews.forEach(review => {
               expect(review.category).toBe('social deduction')
             })
@@ -681,7 +717,7 @@ describe('app', () => {
           title: 'Takenoko',
           review_body: 'Fun with pandas!',
           designer: 'unknown',
-          category: 'dexterity',
+          category: 'dexterity'
         })
         .expect(201)
         .then(({ body: { review } }) => {
@@ -690,7 +726,8 @@ describe('app', () => {
             title: 'Takenoko',
             designer: 'unknown',
             owner: 'philippaclaire9',
-            review_img_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
+            review_img_url:
+              'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
             review_body: 'Fun with pandas!',
             category: 'dexterity',
             created_at: expect.any(String),
@@ -701,44 +738,45 @@ describe('app', () => {
     })
     test('200: returns new review, ignoring extra properties', () => {
       return request(app)
-      .post('/api/reviews')
-      .send({
-        owner: 'philippaclaire9',
-        title: 'Takenoko',
-        review_body: 'Fun with pandas!',
-        designer: 'unknown',
-        category: 'dexterity',
-        something_else: 'test'
-      })
-      .expect(201)
-      .then(({ body: { review } }) => {
-        expect(review).toMatchObject({
-          review_id: 14,
-          title: 'Takenoko',
-          designer: 'unknown',
+        .post('/api/reviews')
+        .send({
           owner: 'philippaclaire9',
-          review_img_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
+          title: 'Takenoko',
           review_body: 'Fun with pandas!',
+          designer: 'unknown',
           category: 'dexterity',
-          created_at: expect.any(String),
-          votes: 0,
-          comment_count: 0
+          something_else: 'test'
         })
-      })
+        .expect(201)
+        .then(({ body: { review } }) => {
+          expect(review).toMatchObject({
+            review_id: 14,
+            title: 'Takenoko',
+            designer: 'unknown',
+            owner: 'philippaclaire9',
+            review_img_url:
+              'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700',
+            review_body: 'Fun with pandas!',
+            category: 'dexterity',
+            created_at: expect.any(String),
+            votes: 0,
+            comment_count: 0
+          })
+        })
     })
     test('400: returns invalid request when any keys are missing', () => {
       return request(app)
-      .post('/api/reviews')
-      .send({
-        owner: 'philippaclaire9',
-        title: 'Takenoko',
-        review_body: 'Fun with pandas!',
-        designer: 'unknown',
-      })
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe('Missing key information from body')
-      })
+        .post('/api/reviews')
+        .send({
+          owner: 'philippaclaire9',
+          title: 'Takenoko',
+          review_body: 'Fun with pandas!',
+          designer: 'unknown'
+        })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Missing key information from body')
+        })
     })
     test('404: returns category not found', () => {
       return request(app)
@@ -748,11 +786,13 @@ describe('app', () => {
           title: 'Takenoko',
           review_body: 'Fun with pandas!',
           designer: 'unknown',
-          category: 'panda fun',
+          category: 'panda fun'
         })
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe('Key (category)=(panda fun) is not present in table "categories".')
+          expect(msg).toBe(
+            'Key (category)=(panda fun) is not present in table "categories".'
+          )
         })
     })
     test('404: returns owner not found', () => {
@@ -763,11 +803,13 @@ describe('app', () => {
           title: 'Takenoko',
           review_body: 'Fun with pandas!',
           designer: 'unknown',
-          category: 'dexterity',
+          category: 'dexterity'
         })
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe('Key (owner)=(Erin) is not present in table "users".')
+          expect(msg).toBe(
+            'Key (owner)=(Erin) is not present in table "users".'
+          )
         })
     })
   })

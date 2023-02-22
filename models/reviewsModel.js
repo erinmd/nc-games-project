@@ -3,16 +3,20 @@ exports.selectReviews = (
   category,
   sort_by = 'created_at',
   order_by = 'desc',
-  limit = 10
+  limit = 10,
+  page = 1
 ) => {
+
+  const offsetBy = limit*(page-1)
+
   let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, designer, CAST(COUNT(comment_id) AS INT) AS comment_count
     FROM reviews
     LEFT JOIN comments ON reviews.review_id = comments.review_id
     `
-  const queryParams = [limit]
+  const queryParams = [limit, offsetBy]
 
   if (category) {
-    queryString += ' WHERE reviews.category = $2'
+    queryString += ' WHERE reviews.category = $3'
     queryParams.push(category)
   }
 
@@ -37,7 +41,7 @@ exports.selectReviews = (
   queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
     ORDER BY ${sort_by} ${order_by}
-    LIMIT $1`
+    LIMIT $1 OFFSET $2`
 
   return db.query(queryString, queryParams).then(({ rows }) => rows)
 }
