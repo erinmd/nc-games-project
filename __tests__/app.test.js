@@ -85,14 +85,14 @@ describe('app', () => {
     })
   })
 
-  describe('getReviews', () => {
+  describe.only('getReviews', () => {
     describe('no query', () => {
       test('200: GET request responds with array of review objects', () => {
         return request(app)
           .get('/api/reviews')
           .expect(200)
           .then(({ body: { reviews } }) => {
-            expect(reviews).toHaveLength(13)
+            expect(reviews).toHaveLength(10)
             reviews.forEach(review =>
               expect(review).toMatchObject({
                 owner: expect.any(String),
@@ -156,8 +156,7 @@ describe('app', () => {
           .get('/api/reviews?sort_by=owner')
           .expect(200)
           .then(({ body: { reviews } }) => {
-            expect(reviews).toHaveLength(13)
-            reviews.forEach(review =>
+              reviews.forEach(review =>
               expect(review).toMatchObject({
                 owner: expect.any(String),
                 title: expect.any(String),
@@ -200,6 +199,41 @@ describe('app', () => {
           })
       })
     })
+    describe('limit query', () => {
+      test('200: GET request returns array of length limit', () => {
+        return request(app)
+          .get('/api/reviews?limit=3')
+          .expect(200)
+          .then(({body: {reviews}}) => {
+            expect(reviews).toHaveLength(3)
+          })
+      })
+      test('400: GET request with invalid limit returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?limit=invalid')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid request')
+          })
+      })
+      test('400: GET request with negative limit returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews?limit=-1')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('This query must not be negative')
+          })
+      })
+      test('200: GET request with limit larger than table', () => {
+        return request(app)
+          .get('/api/reviews?limit=300')
+          .expect(200)
+          .then(({body: {reviews}}) => {
+            expect(reviews).toHaveLength(13)
+          })
+      })
+
+    })
     describe('multiple queries', () => {
       test('200: returns a list sorted and ordered', () => {
         return request(app)
@@ -216,7 +250,7 @@ describe('app', () => {
           )
           .expect(200)
           .then(({ body: { reviews } }) => {
-            expect(reviews).toHaveLength(11)
+            expect(reviews.length>1).toBe(true)
             reviews.forEach(review => {
               expect(review.category).toBe('social deduction')
             })

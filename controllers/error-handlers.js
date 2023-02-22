@@ -18,6 +18,8 @@ exports.handlePsqlError = (err, req, res, next) => {
         res.status(404).send({msg:err.detail})
     }  else if (err.code === '23502') {
         res.status(400).send({msg: "Missing key information from body"})
+    } else if (err.code === '2201W') {
+        res.status(400).send({msg: 'This query must not be negative'})
     } else next(err)
 }
 

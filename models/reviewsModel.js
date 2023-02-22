@@ -2,16 +2,17 @@ const db = require('../db/connection.js')
 exports.selectReviews = (
   category,
   sort_by = 'created_at',
-  order_by = 'desc'
+  order_by = 'desc',
+  limit = 10
 ) => {
   let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, designer, CAST(COUNT(comment_id) AS INT) AS comment_count
     FROM reviews
     LEFT JOIN comments ON reviews.review_id = comments.review_id
     `
-  const queryParams = []
+  const queryParams = [limit]
 
   if (category) {
-    queryString += ' WHERE reviews.category = $1'
+    queryString += ' WHERE reviews.category = $2'
     queryParams.push(category)
   }
 
@@ -35,7 +36,8 @@ exports.selectReviews = (
 
   queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
-    ORDER BY ${sort_by} ${order_by}`
+    ORDER BY ${sort_by} ${order_by}
+    LIMIT $1`
 
   return db.query(queryString, queryParams).then(({ rows }) => rows)
 }
