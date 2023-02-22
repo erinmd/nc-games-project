@@ -18,7 +18,6 @@ afterAll(() => {
 
 describe('app', () => {
 
-  
   describe('Valid but non-existent path', () => {
     test('404: any non-existent path request responds with Path not found', () => {
       return request(app)

@@ -1,0 +1,5 @@
+exports.apiRouter = require('./api-router')
+exports.categoryRouter = require('./category-router')
+exports.commentRouter = require('./comment-router')
+exports.userRouter = require('./user-router')
+exports.reviewRouter = require('./review-router')
