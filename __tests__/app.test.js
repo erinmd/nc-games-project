@@ -359,7 +359,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('getComments', () => {
+  describe('getComments', () => {
     describe('no query', () => {
       test('200: GET request responds with an array of comments', () => {
         return request(app)
@@ -437,6 +437,41 @@ describe('app', () => {
           .expect(200)
           .then(({ body: { comments } }) => {
             expect(comments).toHaveLength(3)
+          })
+      })
+    })
+    describe('page query', () => {
+      test('200: returns second page', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?limit=2&p=2')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(1)
+            expect(comments[0].comment_id).toBe(4)
+          })
+      })
+      test('200: returns empty array if no results on page', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?p=20')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(0)
+          })
+      })
+      test('400: GET request with negative p returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?p=-1')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Page number must not be negative')
+          })
+      })
+      test('400: GET request with invalid p returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?p=invalid')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid request')
           })
       })
     })
