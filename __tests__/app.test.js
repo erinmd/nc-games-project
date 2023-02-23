@@ -908,4 +908,63 @@ describe('app', () => {
         })
     })
   })
+
+  describe.only('postCategories', () => {
+    test('201: returns newly added category object', () => {
+      return request(app)
+        .post('/api/categories')
+        .send({
+          slug: 'category name here',
+          description: 'description here'
+        })
+        .expect(201)
+        .then(({ body: { category } }) => {
+          expect(category).toEqual({
+            slug: 'category name here',
+            description: 'description here'
+          })
+        })
+    })
+    test('201: returns new category, ignoring extra properties', () => {
+      return request(app)
+        .post('/api/categories')
+        .send({
+          slug: 'category name here',
+          description: 'description here',
+          extra: 'ignored'
+        })
+        .expect(201)
+        .then(({ body: { category } }) => {
+          expect(category).toEqual({
+            slug: 'category name here',
+            description: 'description here'
+          })
+        })
+    })
+    test('400: returns invalid request when slug is missing', () => {
+      return request(app)
+        .post('/api/categories')
+        .send({
+          description: 'description here'
+        })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Missing key information from body')
+        })
+    })
+    test('201: returns category with description missing', () => {
+      return request(app)
+        .post('/api/categories')
+        .send({
+          slug: 'category name here'
+        })
+        .expect(201)
+        .then(({ body: { category } }) => {
+          expect(category).toEqual({
+            slug: 'category name here',
+            description: null
+          })
+        })
+    })
+  })
 })
