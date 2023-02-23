@@ -95,3 +95,8 @@ exports.insertReview = newReview => {
     return rows[0]
   })
 }
+
+exports.removeReview = reviewId => {
+  return db.query(`DELETE FROM reviews
+                   WHERE review_id = $1`, [reviewId])
+}

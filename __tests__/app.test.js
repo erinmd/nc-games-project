@@ -909,7 +909,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('postCategories', () => {
+  describe('postCategories', () => {
     test('201: returns newly added category object', () => {
       return request(app)
         .post('/api/categories')
@@ -965,6 +965,25 @@ describe('app', () => {
             description: null
           })
         })
+    })
+  })
+  describe('deleteReview', () => {
+    test('204: returns no content', () => {
+      return request(app)
+      .delete('/api/reviews/1')
+      .expect(204)
+    })
+    test('404: valid review id not found', () => {
+      return request(app)
+      .delete('/api/reviews/1000')
+      .expect(404)
+      .then(({body:{msg}})=> expect(msg).toBe('review_id not found'))
+    })
+    test('400: returns an invalid request', () => {
+      return request(app)
+      .delete('/api/reviews/invalid')
+      .expect(400)
+      .then(({body:{msg}})=> expect(msg).toBe('Invalid request'))
     })
   })
 })
