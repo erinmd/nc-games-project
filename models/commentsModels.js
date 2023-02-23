@@ -1,25 +1,21 @@
 const db = require('../db/connection.js')
-const { selectReview } = require('./reviewsModel.js')
 
 exports.selectComments = (reviewId, limit = 10, page = 1) => {
   const offsetBy = limit * (page - 1)
-  return selectReview(reviewId)
-    .then(() => {
-      return db.query(
-        `SELECT * FROM comments
+  return db
+    .query(
+      `SELECT * FROM comments
          WHERE review_id = $1
          ORDER BY created_at DESC
          LIMIT $2 OFFSET $3`,
-        [reviewId, limit, offsetBy]
-      )
-    })
+      [reviewId, limit, offsetBy]
+    )
     .then(res => {
       return res.rows
     })
 }
 
-exports.insertComment = (newComment, reviewId) => {
-  let { username, body } = newComment
+exports.insertComment = ({ username, body }, reviewId) => {
 
   return db
     .query(
@@ -35,24 +31,27 @@ exports.insertComment = (newComment, reviewId) => {
     })
 }
 
-exports.removeComment = (commentId) => {
+exports.removeComment = commentId => {
   return db.query(
     `DELETE FROM comments
-     WHERE comment_id = $1`, [commentId]
+     WHERE comment_id = $1`,
+    [commentId]
   )
 }
 
 exports.updateComment = (commentId, voteInc) => {
-  return db.query(
-    `UPDATE comments
+  return db
+    .query(
+      `UPDATE comments
      SET votes = votes + $1
      WHERE comment_id = $2
-     RETURNING *`, [voteInc, commentId]
-  )
-  .then(res => {
-    if(!res.rowCount) {
-      return Promise.reject({status:404, msg:'Comment not found'})
-    }
-    return res.rows[0]
-  })
+     RETURNING *`,
+      [voteInc, commentId]
+    )
+    .then(res => {
+      if (!res.rowCount) {
+        return Promise.reject({ status: 404, msg: 'Comment not found' })
+      }
+      return res.rows[0]
+    })
 }

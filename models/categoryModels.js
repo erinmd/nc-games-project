@@ -4,8 +4,7 @@ exports.selectCategories = () => {
   return db.query(`SELECT * FROM categories`).then(({ rows }) => rows)
 }
 
-exports.insertCategory = newCategory => {
-  const { slug, description } = newCategory
+exports.insertCategory = ({ slug, description }) => {
   return db
     .query(
       `INSERT INTO categories

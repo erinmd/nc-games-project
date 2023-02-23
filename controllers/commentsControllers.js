@@ -9,8 +9,10 @@ const {
 exports.getComments = (req, res, next) => {
   const { review_id } = req.params
   const { limit, p } = req.query
-  return selectComments(review_id, limit, p)
-    .then(comments => res.status(200).send({ comments }))
+  const checkReviewExistsPromise = checkExists('reviews', 'review_id', review_id)
+  const selectCommentsPromise = selectComments(review_id, limit, p)
+  return Promise.all([selectCommentsPromise, checkReviewExistsPromise])
+    .then(([comments]) => res.status(200).send({ comments }))
     .catch(err => next(err))
 }
 

@@ -1,6 +1,6 @@
-const express = require('express')
 const { handle500Error, handleCustomError, handlePsqlError, handle404PathError } = require('./controllers/error-handlers')
 const { apiRouter, categoryRouter, reviewRouter, commentRouter, userRouter } = require('./routes')
+const express = require('express')
 const app = express()
 
 app.use(express.json());

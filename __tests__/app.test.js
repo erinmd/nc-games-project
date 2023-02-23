@@ -18,7 +18,7 @@ afterAll(() => {
 
 describe('app', () => {
   describe('Valid but non-existent path', () => {
-    test('404: any non-existent path request responds with Path not found', () => {
+    test('404: ANY request for non-existent path responds with Path not found', () => {
       return request(app)
         .get('/api/path_that_doesnt_exist')
         .expect(404)
@@ -235,7 +235,7 @@ describe('app', () => {
       })
     })
     describe('page query', () => {
-      test('200: returns second page', () => {
+      test('200: GET returns second page', () => {
         return request(app)
           .get('/api/reviews?p=2')
           .expect(200)
@@ -243,7 +243,7 @@ describe('app', () => {
             expect(reviews).toHaveLength(3)
           })
       })
-      test('200: returns empty array if no results on page', () => {
+      test('200: GET returns empty array if no results on page', () => {
         return request(app)
           .get('/api/reviews?p=20')
           .expect(200)
@@ -269,7 +269,7 @@ describe('app', () => {
       })
     })
     describe('total_count property added to returned object', () => {
-      test('200: returned with total_count property', () => {
+      test('200: GET returned with total_count property', () => {
         return request(app)
           .get('/api/reviews')
           .expect(200)
@@ -281,7 +281,7 @@ describe('app', () => {
       })
     })
     describe('multiple queries', () => {
-      test('200: returns a list sorted and ordered', () => {
+      test('200: GET returns a list sorted and ordered', () => {
         return request(app)
           .get('/api/reviews?order_by=asc&sort_by=owner')
           .expect(200)
@@ -289,7 +289,7 @@ describe('app', () => {
             expect(reviews).toBeSortedBy('owner')
           })
       })
-      test('200: returns a sorted, ordered and filtered list', () => {
+      test('200: GET returns a sorted, ordered and filtered list', () => {
         return request(app)
           .get(
             '/api/reviews?order_by=desc&sort_by=title&category=social+deduction'
@@ -303,7 +303,7 @@ describe('app', () => {
             expect(reviews).toBeSortedBy('title', { descending: true })
           })
       })
-      test('200: returns page 3 of a filtered, limited list with total_count', () => {
+      test('200: GET returns page 3 of a filtered, limited list with total_count', () => {
         return request(app)
           .get(
             '/api/reviews?category=social+deduction&limit=3&p=3&sort_by=review_id&order_by=asc'
@@ -393,7 +393,7 @@ describe('app', () => {
           .get('/api/reviews/10000/comments')
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe('Review not found')
+            expect(msg).toBe('review_id not found')
           })
       })
       test('400: GET request with Invalid request returns bad request', () => {
@@ -440,7 +440,7 @@ describe('app', () => {
       })
     })
     describe('page query', () => {
-      test('200: returns second page', () => {
+      test('200: GET returns second page', () => {
         return request(app)
           .get('/api/reviews/2/comments?limit=2&p=2')
           .expect(200)
@@ -449,7 +449,7 @@ describe('app', () => {
             expect(comments[0].comment_id).toBe(4)
           })
       })
-      test('200: returns empty array if no results on page', () => {
+      test('200: GET returns empty array if no results on page', () => {
         return request(app)
           .get('/api/reviews/2/comments?p=20')
           .expect(200)
@@ -557,7 +557,7 @@ describe('app', () => {
   })
 
   describe('patchReview', () => {
-    test('200 PATCH request responds with updated review with incremented votes', () => {
+    test('200: PATCH request responds with updated review with incremented votes', () => {
       return request(app)
         .patch('/api/reviews/2')
         .send({ inc_votes: 2 })
@@ -577,7 +577,7 @@ describe('app', () => {
           })
         })
     })
-    test('200 PATCH request responds with updated review with decremented votes', () => {
+    test('200: PATCH request responds with updated review with decremented votes', () => {
       return request(app)
         .patch('/api/reviews/2')
         .send({ inc_votes: -2 })
@@ -597,7 +597,7 @@ describe('app', () => {
           })
         })
     })
-    test('200 PATCH request responds with updated review, ignoring extra keys', () => {
+    test('200: PATCH request responds with updated review, ignoring extra keys', () => {
       return request(app)
         .patch('/api/reviews/2')
         .send({ inc_votes: -2, another_key: 'hello' })
@@ -635,7 +635,7 @@ describe('app', () => {
           expect(msg).toBe('Missing key information from body')
         })
     })
-    test('400: Patch request with invalid data-type for increment', () => {
+    test('400: PATCH request with invalid data-type for increment', () => {
       return request(app)
         .patch('/api/reviews/1')
         .send({ inc_votes: 'kev' })
@@ -674,16 +674,16 @@ describe('app', () => {
   })
 
   describe('deleteComment', () => {
-    test('204: returns no content', () => {
+    test('204: DELETE returns no content', () => {
       return request(app).delete('/api/comments/2').expect(204)
     })
-    test('404: returns comment_id not found, if it does not exist', () => {
+    test('404: DELETE returns comment_id not found, if it does not exist', () => {
       return request(app)
         .delete('/api/comments/100')
         .expect(404)
         .then(({ body: { msg } }) => expect(msg).toBe('comment_id not found'))
     })
-    test('400: returns invalid request', () => {
+    test('400: DELETE returns invalid request', () => {
       return request(app)
         .delete('/api/comments/invalid')
         .expect(400)
@@ -692,7 +692,7 @@ describe('app', () => {
   })
 
   describe('patchComment', () => {
-    test('200: returns updated comment with updated votes', () => {
+    test('200: PATCH returns updated comment with updated votes', () => {
       return request(app)
         .patch('/api/comments/3')
         .send({ inc_votes: 3 })
@@ -708,7 +708,7 @@ describe('app', () => {
           })
         })
     })
-    test('200: returns updated comment with updated votes ignoring extra keys', () => {
+    test('200: PATCH returns updated comment with updated votes ignoring extra keys', () => {
       return request(app)
         .patch('/api/comments/3')
         .send({ inc_votes: 3, anything: 'test' })
@@ -724,7 +724,7 @@ describe('app', () => {
           })
         })
     })
-    test('404: returns comment not found', () => {
+    test('404: PATCH returns comment not found', () => {
       return request(app)
         .patch('/api/comments/3000')
         .send({ inc_votes: 3 })
@@ -742,7 +742,7 @@ describe('app', () => {
           expect(msg).toBe('Missing key information from body')
         })
     })
-    test('400: Patch request with invalid data-type for increment', () => {
+    test('400: PATCH request with invalid data-type for increment', () => {
       return request(app)
         .patch('/api/comments/2')
         .send({ inc_votes: 'NAN' })
@@ -754,7 +754,7 @@ describe('app', () => {
   })
 
   describe('getUser', () => {
-    test('200: returns user', () => {
+    test('200: GET returns user', () => {
       return request(app)
         .get('/api/users/bainesface')
         .expect(200)
@@ -767,7 +767,7 @@ describe('app', () => {
           )
         })
     })
-    test('404: returns username not found', () => {
+    test('404: GET returns username not found', () => {
       return request(app)
         .get('/api/users/fake-user')
         .expect(404)
@@ -776,7 +776,7 @@ describe('app', () => {
   })
 
   describe('postReview', () => {
-    test('200: returns new review', () => {
+    test('200: POST returns new review', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -803,7 +803,7 @@ describe('app', () => {
           })
         })
     })
-    test('200: returns new review with default url', () => {
+    test('200: POST returns new review with default url', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -830,7 +830,7 @@ describe('app', () => {
           })
         })
     })
-    test('200: returns new review, ignoring extra properties', () => {
+    test('200: POST returns new review, ignoring extra properties', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -858,7 +858,7 @@ describe('app', () => {
           })
         })
     })
-    test('400: returns invalid request when any keys are missing', () => {
+    test('400: POST returns invalid request when any keys are missing', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -872,7 +872,7 @@ describe('app', () => {
           expect(msg).toBe('Missing key information from body')
         })
     })
-    test('404: returns category not found', () => {
+    test('404: POST returns category not found', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -889,7 +889,7 @@ describe('app', () => {
           )
         })
     })
-    test('404: returns owner not found', () => {
+    test('404: POST returns owner not found', () => {
       return request(app)
         .post('/api/reviews')
         .send({
@@ -909,7 +909,7 @@ describe('app', () => {
   })
 
   describe('postCategories', () => {
-    test('201: returns newly added category object', () => {
+    test('201: POST returns newly added category object', () => {
       return request(app)
         .post('/api/categories')
         .send({
@@ -924,7 +924,7 @@ describe('app', () => {
           })
         })
     })
-    test('201: returns new category, ignoring extra properties', () => {
+    test('201: POST returns new category, ignoring extra properties', () => {
       return request(app)
         .post('/api/categories')
         .send({
@@ -940,7 +940,7 @@ describe('app', () => {
           })
         })
     })
-    test('400: returns invalid request when slug is missing', () => {
+    test('400: POST returns invalid request when slug is missing', () => {
       return request(app)
         .post('/api/categories')
         .send({
@@ -951,7 +951,7 @@ describe('app', () => {
           expect(body.msg).toBe('Missing key information from body')
         })
     })
-    test('201: returns category with description missing', () => {
+    test('201: POST returns category with description missing', () => {
       return request(app)
         .post('/api/categories')
         .send({
@@ -967,18 +967,18 @@ describe('app', () => {
     })
   })
   describe('deleteReview', () => {
-    test('204: returns no content', () => {
+    test('204: DELETE returns no content', () => {
       return request(app)
       .delete('/api/reviews/1')
       .expect(204)
     })
-    test('404: valid review id not found', () => {
+    test('404: DELETE valid review id not found', () => {
       return request(app)
       .delete('/api/reviews/1000')
       .expect(404)
       .then(({body:{msg}})=> expect(msg).toBe('review_id not found'))
     })
-    test('400: returns an invalid request', () => {
+    test('400: DELETE returns an invalid request', () => {
       return request(app)
       .delete('/api/reviews/invalid')
       .expect(400)

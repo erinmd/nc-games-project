@@ -8,8 +8,10 @@ exports.selectReviews = (
 ) => {
   const offsetBy = limit * (page - 1)
 
-  let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, 
-                            designer, CAST(COUNT(comment_id) AS INT) AS comment_count, CAST(COUNT(*) OVER() AS INT) AS total_count
+  let queryString = `SELECT owner, title, reviews.review_id, category, review_img_url, 
+                            reviews.created_at, reviews.votes, designer, 
+                            CAST(COUNT(comment_id) AS INT) AS comment_count, 
+                            CAST(COUNT(*) OVER() AS INT) AS total_count
     FROM reviews
     LEFT JOIN comments ON reviews.review_id = comments.review_id
     `
@@ -43,7 +45,7 @@ exports.selectReviews = (
     ORDER BY ${sort_by} ${order_by}
     LIMIT $1 OFFSET $2`
 
-  return db.query(queryString, queryParams).then(({rows}) => rows)
+  return db.query(queryString, queryParams).then(({ rows }) => rows)
 }
 
 exports.selectReview = reviewId => {
@@ -78,9 +80,8 @@ exports.updateReview = (reviewId, voteInc) => {
     })
 }
 
-exports.insertReview = newReview => {
-  const { owner, title, review_body, designer, category, review_img_url } =
-    newReview
+exports.insertReview =({ owner, title, review_body, designer, category, review_img_url }) => {
+
   const queryParams = [owner, title, review_body, designer, category]
   let queryString = `INSERT INTO reviews
                      (owner, title, review_body, designer, category`
@@ -97,6 +98,9 @@ exports.insertReview = newReview => {
 }
 
 exports.removeReview = reviewId => {
-  return db.query(`DELETE FROM reviews
-                   WHERE review_id = $1`, [reviewId])
+  return db.query(
+    `DELETE FROM reviews
+                   WHERE review_id = $1`,
+    [reviewId]
+  )
 }
