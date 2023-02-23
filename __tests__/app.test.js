@@ -85,7 +85,7 @@ describe('app', () => {
     })
   })
 
-  describe.only('getReviews', () => {
+  describe('getReviews', () => {
     describe('no query', () => {
       test('200: GET request responds with array of review objects', () => {
         return request(app)
@@ -274,7 +274,7 @@ describe('app', () => {
         return request(app)
           .get('/api/reviews')
           .expect(200)
-          .then(({ body: {reviews} }) => {
+          .then(({ body: { reviews } }) => {
             reviews.forEach(review => {
               expect(review).toHaveProperty('total_count', 13)
             })
@@ -306,9 +306,11 @@ describe('app', () => {
       })
       test('200: returns page 3 of a filtered, limited list with total_count', () => {
         return request(app)
-          .get('/api/reviews?category=social+deduction&limit=3&p=3&sort_by=review_id&order_by=asc')
+          .get(
+            '/api/reviews?category=social+deduction&limit=3&p=3&sort_by=review_id&order_by=asc'
+          )
           .expect(200)
-          .then(({body:{reviews}}) => {
+          .then(({ body: { reviews } }) => {
             expect(reviews).toHaveLength(3)
             const firstReview = reviews[0]
             expect(firstReview.total_count).toBe(11)
@@ -357,59 +359,86 @@ describe('app', () => {
     })
   })
 
-  describe('getComments', () => {
-    test('200: GET request responds with an array of comments', () => {
-      return request(app)
-        .get('/api/reviews/2/comments')
-        .expect(200)
-        .then(({ body: { comments } }) => {
-          expect(comments).toHaveLength(3)
-          comments.forEach(comment => {
-            expect(comment).toMatchObject({
-              comment_id: expect.any(Number),
-              votes: expect.any(Number),
-              created_at: expect.any(String),
-              author: expect.any(String),
-              body: expect.any(String),
-              review_id: expect.any(Number)
+  describe.only('getComments', () => {
+    describe('no query', () => {
+      test('200: GET request responds with an array of comments', () => {
+        return request(app)
+          .get('/api/reviews/2/comments')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(3)
+            comments.forEach(comment => {
+              expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                review_id: expect.any(Number)
+              })
             })
+            expect(comments).toBeSortedBy('created_at', { descending: true })
           })
-          expect(comments).toBeSortedBy('created_at', { descending: true })
-        })
+      })
+      test('200: GET request where review id has no comments', () => {
+        return request(app)
+          .get('/api/reviews/1/comments')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toBeInstanceOf(Array)
+            expect(comments).toHaveLength(0)
+          })
+      })
+      test('404: GET request with an id out of range returns "Not Found"', () => {
+        return request(app)
+          .get('/api/reviews/10000/comments')
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Review not found')
+          })
+      })
+      test('400: GET request with Invalid request returns bad request', () => {
+        return request(app)
+          .get('/api/reviews/bananas/comments')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid request')
+          })
+      })
     })
-    test('200: GET request where review id has no comments', () => {
-      return request(app)
-        .get('/api/reviews/1/comments')
-        .expect(200)
-        .then(({ body: { comments } }) => {
-          expect(comments).toBeInstanceOf(Array)
-          expect(comments).toHaveLength(0)
-        })
-    })
-    test('404: GET request with an id out of range returns "Not Found"', () => {
-      return request(app)
-        .get('/api/reviews/10000/comments')
-        .expect(404)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe('Review not found')
-        })
-    })
-    test('400: GET request with Invalid request returns bad request', () => {
-      return request(app)
-        .get('/api/reviews/bananas/comments')
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe('Invalid request')
-        })
-    })
-    test('400: GET request with Invalid request returns bad request', () => {
-      return request(app)
-        .patch('/api/reviews/bananas')
-        .send({ inc_votes: 2 })
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe('Invalid request')
-        })
+    describe('limit query', () => {
+      test('200: GET request returns array of length limit', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?limit=1')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(1)
+          })
+      })
+      test('400: GET request with invalid limit returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?limit=invalid')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Invalid request')
+          })
+      })
+      test('400: GET request with negative limit returns invalid request', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?limit=-1')
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe('Limit must not be negative')
+          })
+      })
+      test('200: GET request with limit larger than table', () => {
+        return request(app)
+          .get('/api/reviews/2/comments?limit=300')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(3)
+          })
+      })
     })
   })
 
@@ -576,6 +605,15 @@ describe('app', () => {
       return request(app)
         .patch('/api/reviews/1')
         .send({ inc_votes: 'kev' })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe('Invalid request')
+        })
+    })
+    test('400: PATCH request with Invalid request returns bad request', () => {
+      return request(app)
+        .patch('/api/reviews/bananas')
+        .send({ inc_votes: 2 })
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe('Invalid request')

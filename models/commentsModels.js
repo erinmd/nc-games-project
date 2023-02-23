@@ -1,14 +1,15 @@
 const db = require('../db/connection.js')
 const { selectReview } = require('./reviewsModel.js')
 
-exports.selectComments = reviewId => {
+exports.selectComments = (reviewId, limit) => {
   return selectReview(reviewId)
     .then(() => {
       return db.query(
         `SELECT * FROM comments
          WHERE review_id = $1
-         ORDER BY created_at DESC`,
-        [reviewId]
+         ORDER BY created_at DESC
+         LIMIT $2`,
+        [reviewId, limit]
       )
     })
     .then(res => {
