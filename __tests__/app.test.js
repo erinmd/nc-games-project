@@ -34,32 +34,31 @@ describe('app', () => {
         .get('/api')
         .expect(200)
         .then(({ body: { endpoints } }) => {
-          endpointsObject = JSON.parse(endpoints)
-          expect(endpointsObject).toBeInstanceOf(Object)
-          expect(endpointsObject).toHaveProperty('GET /api')
-          expect(endpointsObject).toHaveProperty('GET /api/categories')
-          expect(endpointsObject).toHaveProperty('GET /api/reviews')
-          expect(endpointsObject).toHaveProperty('GET /api/reviews/:review_id')
-          expect(endpointsObject).toHaveProperty('GET /api/users')
-          expect(endpointsObject).toHaveProperty(
+          expect(endpoints).toBeInstanceOf(Object)
+          expect(endpoints).toHaveProperty('GET /api')
+          expect(endpoints).toHaveProperty('GET /api/categories')
+          expect(endpoints).toHaveProperty('GET /api/reviews')
+          expect(endpoints).toHaveProperty('GET /api/reviews/:review_id')
+          expect(endpoints).toHaveProperty('GET /api/users')
+          expect(endpoints).toHaveProperty(
             'PATCH /api/reviews/:review_id'
           )
-          expect(endpointsObject).toHaveProperty(
+          expect(endpoints).toHaveProperty(
             'POST /api/reviews/:review_id/comments'
           )
-          expect(endpointsObject).toHaveProperty(
+          expect(endpoints).toHaveProperty(
             'DELETE /api/comments/:comment_id'
           )
-          for (const endpoint in endpointsObject) {
-            expect(endpointsObject[endpoint]).toHaveProperty('description')
+          for (const endpoint in endpoints) {
+            expect(endpoints[endpoint]).toHaveProperty('description')
             if (endpoint.startsWith('GET /api/')) {
-              expect(endpointsObject[endpoint]).toHaveProperty(
+              expect(endpoints[endpoint]).toHaveProperty(
                 'exampleResponse'
               )
-              expect(endpointsObject[endpoint]).toHaveProperty('queries')
+              expect(endpoints[endpoint]).toHaveProperty('queries')
             }
             if (endpoint.startsWith('POST') || endpoint.startsWith('PATCH')) {
-              expect(endpointsObject[endpoint]).toHaveProperty(
+              expect(endpoints[endpoint]).toHaveProperty(
                 'exampleRequestBody'
               )
             }
