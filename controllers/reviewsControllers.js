@@ -48,7 +48,7 @@ exports.deleteReview = (req, res, next) => {
     review_id
   )
   .then(()=> {
-    removeReview(review_id)
+    return removeReview(review_id)
   })
     .then(() => res.status(204).send())
     .catch(err => next(err))
