@@ -9,8 +9,6 @@ const {
 } = require('../db/data/test-data/index.js')
 const seed = require('../db/seeds/seed.js')
 
-seed({ categoryData, commentData, reviewData, userData })
-
 beforeEach(() => {
   return seed({ categoryData, commentData, reviewData, userData })
 })
@@ -677,7 +675,7 @@ describe('app', () => {
 
   describe('deleteComment', () => {
     test('204: DELETE returns no content', () => {
-      return request(app).delete('/api/comments/2').expect(404).then(res => console.log('deleteComment', res))
+      return request(app).delete('/api/comments/2').expect(204)
     })
     test('404: DELETE returns comment_id not found, if it does not exist', () => {
       return request(app)
@@ -972,8 +970,7 @@ describe('app', () => {
     test('204: DELETE returns no content', () => {
       return request(app)
       .delete('/api/reviews/1')
-      .expect(404)
-      .then(res => console.log('deleteReview', res))
+      .expect(204)
     })
     test('404: DELETE valid review id not found', () => {
       return request(app)
