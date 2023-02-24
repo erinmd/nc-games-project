@@ -2,7 +2,7 @@ name: Test & Deploy
 on: 
   push:
     branches:
-      - main
+      - test-git-actions
 jobs:
   runUnitTests:
     name: Unit Tests
