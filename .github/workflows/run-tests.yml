@@ -4,7 +4,7 @@ on:
     branches:
       - cicd
 jobs:
-  Test this works:
+  Test:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Yay! This works"
