@@ -76,6 +76,9 @@ exports.updateReview = (reviewId, voteInc) => {
     )
 
     .then(res => {
+      if (!res.rowCount){
+      return Promise.reject({ status: 404, msg: 'review_id not found' })
+    }
       return res.rows[0]
     })
 }
@@ -100,7 +103,13 @@ exports.insertReview =({ owner, title, review_body, designer, category, review_i
 exports.removeReview = reviewId => {
   return db.query(
     `DELETE FROM reviews
-                   WHERE review_id = $1`,
+     WHERE review_id = $1
+     RETURNING *`,
     [reviewId]
   )
+  .then(res => {
+    if (!res.rowCount){
+      return Promise.reject({ status: 404, msg: 'review_id not found' })
+    }
+  })
 }

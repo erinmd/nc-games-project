@@ -9,11 +9,10 @@ const {
 exports.getComments = (req, res, next) => {
   const { review_id } = req.params
   const { limit, p } = req.query
-  return checkExists('reviews', 'review_id', review_id)
-    .then(() => {
-      return selectComments(review_id, limit, p)
-    })
-    .then((comments) => res.status(200).send({ comments }))
+  const checkReviewExists = checkExists('reviews', 'review_id', review_id)
+  const selectCommentsPromise = selectComments(review_id, limit, p)
+  return Promise.all([selectCommentsPromise, checkReviewExists])
+    .then(([comments]) => res.status(200).send({ comments }))
     .catch(err => next(err))
 }
 
@@ -26,10 +25,8 @@ exports.postComment = (req, res, next) => {
 
 exports.deleteComment = (req, res, next) => {
   const { comment_id } = req.params
-  return checkExists('comments', 'comment_id', comment_id)
-    .then(() => {
-      return removeComment(comment_id)
-    })
+
+  return removeComment(comment_id)
     .then(() => res.status(204).send())
     .catch(err => next(err))
 }

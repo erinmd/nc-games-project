@@ -24,10 +24,8 @@ exports.getReview = (req, res, next) => {
 exports.patchReview = (req, res, next) => {
   const { review_id } = req.params
   const { inc_votes } = req.body
-  const checkReviewIdPromise = checkExists('reviews', 'review_id', review_id)
-  const updateReviewPromise = updateReview(review_id, inc_votes)
-  return Promise.all([updateReviewPromise, checkReviewIdPromise])
-    .then(([review]) => res.status(200).send({ review }))
+  return updateReview(review_id, inc_votes)
+    .then(review => res.status(200).send({ review }))
     .catch(err => next(err))
 }
 
@@ -42,14 +40,7 @@ exports.postReview = (req, res, next) => {
 
 exports.deleteReview = (req, res, next) => {
   const { review_id } = req.params
-  return checkExists(
-    'reviews',
-    'review_id',
-    review_id
-  )
-  .then(()=> {
-    return removeReview(review_id)
-  })
+  return removeReview(review_id)
     .then(() => res.status(204).send())
     .catch(err => next(err))
 }
