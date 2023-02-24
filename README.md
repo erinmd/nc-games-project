@@ -21,7 +21,7 @@ git branch -M main
 git push -u origin main
 ```
 ### Install dependencies
-Run npm install to install all the relevant packages. Most of what you need is here already, but you will additionally need to install express and supertest
+Use npm install to install all the dependencies
 
 ### Setup your .env files
 You will need to create two.env files: `.env.test` and `.env.development`.
@@ -42,7 +42,7 @@ npm test <filename>
 ```
 Or omit the filename to run all. The tests can be found in the `__tests__` directory
 ***
-## Versions used
-Node v19.6.0
+## Minimum requirements
+Node v16
 
 Postgres v14.6
