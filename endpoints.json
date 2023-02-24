@@ -15,7 +15,7 @@
     }
   },
   "GET /api/reviews": {
-    "description": "serves an array of all reviews",
+    "description": "serves an array of reviews, defaults to length 10",
     "queries": [
       "category",
       "sort_by",
@@ -59,7 +59,7 @@
     }
   },
   "GET /api/reviews/:review_id/comments": {
-    "description": "serves an array of all comments",
+    "description": "serves an array of comments, defaults to length 10",
     "queries": ["limit", "p"],
     "exampleResponse": [
       {
