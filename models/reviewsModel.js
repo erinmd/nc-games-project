@@ -30,7 +30,8 @@ exports.selectReviews = (
     'review_img_url',
     'created_at',
     'votes',
-    'designer'
+    'designer',
+    'comment_count'
   ]
   if (!validSortBys.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: 'Invalid key to sort by' })
