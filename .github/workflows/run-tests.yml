@@ -7,4 +7,4 @@ jobs:
   Test this works:
     runs-on: ubuntu-latest
     steps:
-      -run: echo "Yay! This works"
+      - run: echo "Yay! This works"
