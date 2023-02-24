@@ -42,13 +42,14 @@ exports.postReview = (req, res, next) => {
 
 exports.deleteReview = (req, res, next) => {
   const { review_id } = req.params
-  const checkReviewExistsPromise = checkExists(
+  return checkExists(
     'reviews',
     'review_id',
     review_id
   )
-  const deleteReviewPromise = removeReview(review_id)
-  return Promise.all([checkReviewExistsPromise, deleteReviewPromise])
+  .then(()=> {
+    return removeReview(review_id)
+  })
     .then(() => res.status(204).send())
     .catch(err => next(err))
 }
