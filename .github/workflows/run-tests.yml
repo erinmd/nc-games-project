@@ -4,20 +4,44 @@ on:
     branches:
       - cicd
 jobs:
-  Test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Yay! This works"
   runUnitTests:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
+
       - name: Use Node.js
         uses: actions/setup-node@v2
+
       - name: install the dependencies
-        run: npm i
+        run: npm ci
+
       - name: run unit tests
         run: npm test utils
 
+  runE2ETests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: runUnitTests
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 19
+
+      - name: Use PostgreSQL
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql db: 'my_db'
+          postgresql user: 'test_user'
+          postgresql password: 'test_password'
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: Run E2E tests
+        run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t app
