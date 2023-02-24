@@ -675,7 +675,7 @@ describe('app', () => {
 
   describe('deleteComment', () => {
     test('204: DELETE returns no content', () => {
-      return request(app).delete('/api/comments/2').expect(204)
+      return request(app).delete('/api/comments/2').expect(204).then(err => console.log(err))
     })
     test('404: DELETE returns comment_id not found, if it does not exist', () => {
       return request(app)
