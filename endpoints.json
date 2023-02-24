@@ -99,10 +99,11 @@
     }
   },
   "POST /api/reviews/:review_id/comments": {
-    "description": "inserts new comment into table using a request body like below - any extra keys will be ignored. Serves the new comment object",
+    "description": "inserts new comment into table using a request body like below - any extra keys will be ignored. Serves the new comment object with votes initiated at 0",
     "exampleRequestBody": {
-      "username": "mallionaire",
-      "body": "The best game ever!"
+      "username": "String",
+      "body": "String",
+      "Extra key": "ignored" 
     },
     "exampleResponse": {
       "comment": {
@@ -116,14 +117,14 @@
     }
   },
   "POST /api/reviews": {
-    "description": "inserts new review, using an object as below the url is optional. Serves up review with all properties",
+    "description": "inserts new review. Serves up review with all properties including votes initiated at 0",
     "exampleRequestBody": {
-      "owner": "philippaclaire9",
-      "title": "Takenoko",
-      "review_body": "Fun with pandas!",
-      "designer": "'unknown'",
-      "category": "'dexterity'",
-      "review_img_url": "'https://fake-address.fake.com'"
+      "owner": "String",
+      "title": "String",
+      "review_body": "String",
+      "designer": "String",
+      "category": "String'",
+      "review_img_url": "Optional String"
     },
     "exampleResponse": {
       "review_id": 14,
@@ -139,10 +140,10 @@
     }
   },
   "POST /api/categories": {
-    "description": "inserts new category with an object similar to below. It must have a slug, but description is optional. Serves up new category",
+    "description": "inserts new category. Serves up new category",
     "exampleRequestBody": {
-      "slug": "category name here",
-      "description": "optional description"
+      "slug": "String",
+      "description": "Optional String"
     },
     "exampleResponse": {
       "slug": "category name here",
@@ -150,7 +151,7 @@
     }
   },
   "PATCH /api/reviews/:review_id": {
-    "description": "updates the votes column for specified review and then serves the updated review object",
+    "description": "Increments the votes column for specified review and then serves the updated review object",
     "exampleRequestBody": {
       "inc_votes": 2
     },
@@ -170,7 +171,7 @@
   },
   
   "PATCH /api/comments/:comment_id": {
-    "description": "updates the votes column for specified comment and then serves the updated comment object",
+    "description": "Increments the votes column for specified comment and then serves the updated comment object",
     "exampleRequestBody": {
       "inc_votes": 2
     },
