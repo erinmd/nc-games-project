@@ -1,5 +1,5 @@
 # Northcoders House of Games API
-
+[![Test & Deploy](https://github.com/erinmd/nc-games-project/actions/workflows/run-tests.yml/badge.svg)](https://github.com/erinmd/nc-games-project/actions/workflows/run-tests.yml)
 ## Hosted version
 
 You can access the [hosted version here](https://nc-games-project-2obg.onrender.com/api/)
