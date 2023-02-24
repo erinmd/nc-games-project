@@ -43,8 +43,5 @@ jobs:
       - name: install dependencies
         run: npm ci
 
-      - name: setup database
-        run: psql -f ./db/setup.sql
-
       - name: Run E2E tests
         run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t app
