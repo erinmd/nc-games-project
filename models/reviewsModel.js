@@ -43,7 +43,7 @@ exports.selectReviews = (
 
   queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
-    ORDER BY ${sort_by} ${order_by}
+    ORDER BY reviews.${sort_by} ${order_by}
     LIMIT $1 OFFSET $2`
 
   return db.query(queryString, queryParams).then(({ rows }) => rows)
