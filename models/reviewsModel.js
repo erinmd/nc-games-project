@@ -43,7 +43,7 @@ exports.selectReviews = (
 
   queryString += ` GROUP BY owner, title, reviews.review_id, category, review_img_url,
     reviews.created_at, reviews.votes, designer 
-    ORDER BY reviews.${sort_by} ${order_by}
+    ORDER BY reviews.${sort_by} ${order_by}, reviews.created_at ${order_by}
     LIMIT $1 OFFSET $2`
 
   return db.query(queryString, queryParams).then(({ rows }) => rows)
@@ -77,15 +77,21 @@ exports.updateReview = (reviewId, voteInc) => {
     )
 
     .then(res => {
-      if (!res.rowCount){
-      return Promise.reject({ status: 404, msg: 'review_id not found' })
-    }
+      if (!res.rowCount) {
+        return Promise.reject({ status: 404, msg: 'review_id not found' })
+      }
       return res.rows[0]
     })
 }
 
-exports.insertReview =({ owner, title, review_body, designer, category, review_img_url }) => {
-
+exports.insertReview = ({
+  owner,
+  title,
+  review_body,
+  designer,
+  category,
+  review_img_url
+}) => {
   const queryParams = [owner, title, review_body, designer, category]
   let queryString = `INSERT INTO reviews
                      (owner, title, review_body, designer, category`
@@ -102,15 +108,16 @@ exports.insertReview =({ owner, title, review_body, designer, category, review_i
 }
 
 exports.removeReview = reviewId => {
-  return db.query(
-    `DELETE FROM reviews
+  return db
+    .query(
+      `DELETE FROM reviews
      WHERE review_id = $1
      RETURNING *`,
-    [reviewId]
-  )
-  .then(res => {
-    if (!res.rowCount){
-      return Promise.reject({ status: 404, msg: 'review_id not found' })
-    }
-  })
+      [reviewId]
+    )
+    .then(res => {
+      if (!res.rowCount) {
+        return Promise.reject({ status: 404, msg: 'review_id not found' })
+      }
+    })
 }
