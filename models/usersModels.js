@@ -58,7 +58,7 @@ exports.insertUserVote = (username, review_id, vote) => {
 exports.updateUserVote = (username, review_id, vote) => {
     return db.query(`
     UPDATE uservotes
-    SET vote = $1
+    SET vote = vote + $1
     WHERE review_id = $2 AND username = $3
     RETURNING *`, [vote, review_id, username])
     .then(({rows}) => {
