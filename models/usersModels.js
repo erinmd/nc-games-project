@@ -38,3 +38,31 @@ exports.selectUserVotes = username => {
       return { likes, dislikes }
     })
 }
+
+exports.insertUserVote = (username, review_id, vote) => {
+  return db
+    .query(
+      `
+    INSERT INTO uservotes
+    (username, vote, review_id)
+    VALUES ($1, $2, $3)
+    RETURNING *`,
+      [username, vote, review_id]
+    )
+    .then(({ rows }) => {
+      const { username, review_id, vote } = rows[0]
+      return { username, review_id, vote }
+    })
+}
+
+exports.updateUserVote = (username, review_id, vote) => {
+    return db.query(`
+    UPDATE uservotes
+    SET vote = $1
+    WHERE review_id = $2 AND username = $3
+    RETURNING *`, [vote, review_id, username])
+    .then(({rows}) => {
+        const { username, review_id, vote } = rows[0]
+      return { username, review_id, vote }
+    })
+}

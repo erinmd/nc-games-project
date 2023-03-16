@@ -1004,4 +1004,64 @@ describe('app', () => {
         })
     })
   })
+  describe.only('postUserVote', () => {
+    test('201: returns new user vote', () => {
+      return request(app)
+        .post('/api/users/bainesface/votes')
+        .send({ review_id: 4, vote: 1 })
+        .expect(201)
+        .then(({ body }) => {
+          console.log(body)
+          expect(body.uservote).toEqual({
+            username: 'bainesface',
+            review_id: 4,
+            vote: 1
+          })
+        })
+    })
+    test('201: ignore extra properties', () => {
+      return request(app)
+        .post('/api/users/bainesface/votes')
+        .send({ review_id: 4, vote: 1, another:10 })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.uservote).toEqual({
+            username: 'bainesface',
+            review_id: 4,
+            vote: 1
+          })
+        })
+    })
+    test('400: POST returns invalid request when key is missing', () => {
+      return request(app)
+      .post('/api/users/bainesface/votes')
+      .send({ review_id: 4 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Missing key information from body')
+      })
+    })
+    test('200: POST request returns updated user vote', () => {
+      return request(app)
+        .post('/api/users/bainesface/votes')
+        .send({ review_id: 1, vote: 1})
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.uservote).toEqual({
+            username: 'bainesface',
+            review_id: 1,
+            vote: 1
+          })
+        })
+    })
+    test('404: POST request returns user not found', () => {
+      return request(app)
+        .post('/api/users/blah/votes')
+        .send({ review_id: 1, vote: 1})
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Key (username)=(blah) is not present in table \"users\".")
+        })
+    })
+  })
 })
