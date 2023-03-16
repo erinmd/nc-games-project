@@ -6,7 +6,7 @@ exports.selectComments = (reviewId, limit = 10, page = 1) => {
     .query(
       `SELECT * FROM comments
          WHERE review_id = $1
-         ORDER BY created_at DESC
+         ORDER BY votes DESC, created_at DESC, comment_id
          LIMIT $2 OFFSET $3`,
       [reviewId, limit, offsetBy]
     )

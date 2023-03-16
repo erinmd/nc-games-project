@@ -376,7 +376,7 @@ describe('app', () => {
                 review_id: expect.any(Number)
               })
             })
-            expect(comments).toBeSortedBy('created_at', { descending: true })
+            expect(comments).toBeSortedBy('votes', { descending: true })
           })
       })
       test('200: GET request where review id has no comments', () => {
@@ -446,7 +446,7 @@ describe('app', () => {
           .expect(200)
           .then(({ body: { comments } }) => {
             expect(comments).toHaveLength(1)
-            expect(comments[0].comment_id).toBe(4)
+            expect(comments[0].comment_id).toBe(5)
           })
       })
       test('200: GET returns empty array if no results on page', () => {
