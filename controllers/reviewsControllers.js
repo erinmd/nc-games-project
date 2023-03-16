@@ -1,4 +1,3 @@
-const { checkExists } = require('../models/checkExists')
 const {
   selectReviews,
   selectReview,
