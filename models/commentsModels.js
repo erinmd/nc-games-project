@@ -4,7 +4,7 @@ exports.selectComments = (reviewId, limit = 10, page = 1) => {
   const offsetBy = limit * (page - 1)
   return db
     .query(
-      `SELECT * FROM comments
+      `SELECT *, CAST(COUNT(*) OVER() AS INT) AS total_count FROM comments
          WHERE review_id = $1
          ORDER BY votes DESC, created_at DESC, comment_id
          LIMIT $2 OFFSET $3`,

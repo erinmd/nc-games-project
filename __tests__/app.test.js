@@ -373,7 +373,8 @@ describe('app', () => {
                 created_at: expect.any(String),
                 author: expect.any(String),
                 body: expect.any(String),
-                review_id: expect.any(Number)
+                review_id: expect.any(Number),
+                total_count: 3
               })
             })
             expect(comments).toBeSortedBy('votes', { descending: true })
