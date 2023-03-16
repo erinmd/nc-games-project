@@ -766,6 +766,7 @@ describe('app', () => {
             'avatar_url',
             'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
           )
+          
         })
     })
     test('404: GET returns username not found', () => {
@@ -970,7 +971,7 @@ describe('app', () => {
   describe('deleteReview', () => {
     test('204: DELETE returns no content', () => {
       return request(app)
-      .delete('/api/reviews/1')
+      .delete('/api/reviews/3')
       .expect(204)
     })
     test('404: DELETE valid review id not found', () => {
