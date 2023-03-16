@@ -1050,7 +1050,7 @@ describe('app', () => {
           expect(body.uservote).toEqual({
             username: 'bainesface',
             review_id: 1,
-            vote: 1
+            vote: 0
           })
         })
     })
