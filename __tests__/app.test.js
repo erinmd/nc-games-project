@@ -1004,7 +1004,7 @@ describe('app', () => {
         })
     })
   })
-  describe.only('postUserVote', () => {
+  describe('postUserVote', () => {
     test('201: returns new user vote', () => {
       return request(app)
         .post('/api/users/bainesface/votes')

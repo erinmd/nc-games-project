@@ -36,7 +36,7 @@ exports.postUserVote = (req, res, next) => {
   return selectUserVotes(username)
   .then(userVotes => {
 
-    if (userVotes.dislikes.includes(+review_id) || userVotes.likes.includes(+review_id) || userVotes.dislikes.includes(+review_id)) {
+    if (userVotes.dislikes.includes(+review_id) || userVotes.likes.includes(+review_id) || userVotes.neutral.includes(+review_id)) {
        promise = updateUserVote(username, review_id, vote)
         
     } else {
