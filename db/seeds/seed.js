@@ -140,8 +140,8 @@ const seed = ({ categoryData, commentData, reviewData, userData }) => {
       (review_id, username, vote)
       VALUES 
       (1, '${userData[0].username}', 1),
-      (2, '${userData[0].username}', -1),
-      (2, '${userData[1].username}', 1)
+      (1, '${userData[2].username}', -1),
+      (2, '${userData[2].username}', 1)
       `)
     })
 };

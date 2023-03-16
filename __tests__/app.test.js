@@ -40,27 +40,19 @@ describe('app', () => {
           expect(endpoints).toHaveProperty('GET /api/reviews')
           expect(endpoints).toHaveProperty('GET /api/reviews/:review_id')
           expect(endpoints).toHaveProperty('GET /api/users')
-          expect(endpoints).toHaveProperty(
-            'PATCH /api/reviews/:review_id'
-          )
+          expect(endpoints).toHaveProperty('PATCH /api/reviews/:review_id')
           expect(endpoints).toHaveProperty(
             'POST /api/reviews/:review_id/comments'
           )
-          expect(endpoints).toHaveProperty(
-            'DELETE /api/comments/:comment_id'
-          )
+          expect(endpoints).toHaveProperty('DELETE /api/comments/:comment_id')
           for (const endpoint in endpoints) {
             expect(endpoints[endpoint]).toHaveProperty('description')
             if (endpoint.startsWith('GET /api/')) {
-              expect(endpoints[endpoint]).toHaveProperty(
-                'exampleResponse'
-              )
+              expect(endpoints[endpoint]).toHaveProperty('exampleResponse')
               expect(endpoints[endpoint]).toHaveProperty('queries')
             }
             if (endpoint.startsWith('POST') || endpoint.startsWith('PATCH')) {
-              expect(endpoints[endpoint]).toHaveProperty(
-                'exampleRequestBody'
-              )
+              expect(endpoints[endpoint]).toHaveProperty('exampleRequestBody')
             }
           }
         })
@@ -766,7 +758,6 @@ describe('app', () => {
             'avatar_url',
             'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
           )
-          
         })
     })
     test('404: GET returns username not found', () => {
@@ -970,21 +961,47 @@ describe('app', () => {
   })
   describe('deleteReview', () => {
     test('204: DELETE returns no content', () => {
-      return request(app)
-      .delete('/api/reviews/3')
-      .expect(204)
+      return request(app).delete('/api/reviews/3').expect(204)
     })
     test('404: DELETE valid review id not found', () => {
       return request(app)
-      .delete('/api/reviews/1000')
-      .expect(404)
-      .then(({body:{msg}})=> expect(msg).toBe('review_id not found'))
+        .delete('/api/reviews/1000')
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe('review_id not found'))
     })
     test('400: DELETE returns an invalid request', () => {
       return request(app)
-      .delete('/api/reviews/invalid')
-      .expect(400)
-      .then(({body:{msg}})=> expect(msg).toBe('Invalid request'))
+        .delete('/api/reviews/invalid')
+        .expect(400)
+        .then(({ body: { msg } }) => expect(msg).toBe('Invalid request'))
+    })
+  })
+  describe('getUserVotes', () => {
+    test('200: GET returns users likes and dislikes', () => {
+      return request(app)
+        .get('/api/users/bainesface/votes')
+        .expect(200)
+        .then(({ body: { userVotes } }) => {
+          expect(userVotes).toHaveProperty('likes')
+          expect(userVotes).toHaveProperty('dislikes')
+        })
+    })
+    test('200: Get returns empty array', () => {
+      return request(app)
+        .get('/api/users/dav3rid/votes')
+        .expect(200)
+        .then(({ body: { userVotes } }) => {
+          expect(userVotes.likes.length).toBe(0)
+          expect(userVotes.dislikes.length).toBe(0)
+        })
+    })
+    test('404: Returns user not found', () => {
+      return request(app)
+        .get('/api/users/fakeuser/votes')
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe('username not found')
+        })
     })
   })
 })
