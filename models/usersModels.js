@@ -34,8 +34,10 @@ exports.selectUserVotes = username => {
       const dislikes = data
         .filter(info => info.vote === -1)
         .map(info => info.review_id)
-
-      return { likes, dislikes }
+      const neutral = data
+        .filter(info => info.vote === 0)
+        .map(info => info.review_id)
+      return { likes, dislikes, neutral }
     })
 }
 
@@ -56,13 +58,17 @@ exports.insertUserVote = (username, review_id, vote) => {
 }
 
 exports.updateUserVote = (username, review_id, vote) => {
-    return db.query(`
+  return db
+    .query(
+      `
     UPDATE uservotes
     SET vote = vote + $1
     WHERE review_id = $2 AND username = $3
-    RETURNING *`, [vote, review_id, username])
-    .then(({rows}) => {
-        const { username, review_id, vote } = rows[0]
+    RETURNING *`,
+      [vote, review_id, username]
+    )
+    .then(({ rows }) => {
+      const { username, review_id, vote } = rows[0]
       return { username, review_id, vote }
     })
 }
