@@ -104,7 +104,18 @@
     "exampleResponse": {
       "username": "bainesface",
       "likes": [1, 3],
-      "dislikes": [5, 8]
+      "dislikes": [5, 8],
+      "neutral": []
+    }
+  },
+  "GET /api/users/:username/votes/categories" : {
+    "description": "serves a uservotes object, with a likes and dislikes array containing categories",
+    "queries": [],
+    "exampleResponse": {
+      "username": "bainesface",
+      "likes": ["hidden-roles"],
+      "dislikes": [],
+      "neutral": []
     }
   },
   "POST /api/reviews/:review_id/comments": {
