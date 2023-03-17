@@ -4,7 +4,8 @@ const {
   selectUser,
   selectUserVotes,
   insertUserVote,
-  updateUserVote
+  updateUserVote,
+  selectUserVoteCategories
 } = require('../models/usersModels')
 
 exports.getUsers = (req, res, next) => {
@@ -46,4 +47,12 @@ exports.postUserVote = (req, res, next) => {
   }).then(uservote => {
     res.status(201).send({uservote})})
 .catch(err => next(err))
+}
+
+exports.getUserVoteCategories = (req, res, next) => {
+  const {username} = req.params
+  selectUserVoteCategories(username).then(userVoteCategories => {
+    res.status(200).send({userVoteCategories})
+  })
+  .catch(err => next(err))
 }

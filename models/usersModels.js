@@ -41,6 +41,26 @@ exports.selectUserVotes = username => {
     })
 }
 
+exports.selectUserVoteCategories = username => {
+  return db.query(
+    `SELECT uservotes.vote, reviews.category FROM uservotes
+    JOIN reviews ON reviews.review_id = uservotes.review_id
+    WHERE uservotes.username = $1`, [username]
+  ).then(result => {
+    const data = result.rows
+    const likes = data
+      .filter(info => info.vote === 1)
+      .map(info => info.category)
+    const dislikes = data
+      .filter(info => info.vote === -1)
+      .map(info => info.category)
+    const neutral = data
+      .filter(info => info.vote === 0)
+      .map(info => info.category)
+    return { likes, dislikes, neutral }
+  })
+}
+
 exports.insertUserVote = (username, review_id, vote) => {
   return db
     .query(

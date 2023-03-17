@@ -1020,7 +1020,7 @@ describe('app', () => {
     test('201: ignore extra properties', () => {
       return request(app)
         .post('/api/users/bainesface/votes')
-        .send({ review_id: 4, vote: 1, another:10 })
+        .send({ review_id: 4, vote: 1, another: 10 })
         .expect(201)
         .then(({ body }) => {
           expect(body.uservote).toEqual({
@@ -1032,17 +1032,17 @@ describe('app', () => {
     })
     test('400: POST returns invalid request when key is missing', () => {
       return request(app)
-      .post('/api/users/bainesface/votes')
-      .send({ review_id: 4 })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Missing key information from body')
-      })
+        .post('/api/users/bainesface/votes')
+        .send({ review_id: 4 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Missing key information from body')
+        })
     })
     test('200: POST request returns updated user vote', () => {
       return request(app)
         .post('/api/users/bainesface/votes')
-        .send({ review_id: 1, vote: 1})
+        .send({ review_id: 1, vote: 1 })
         .expect(201)
         .then(({ body }) => {
           expect(body.uservote).toEqual({
@@ -1055,10 +1055,33 @@ describe('app', () => {
     test('404: POST request returns user not found', () => {
       return request(app)
         .post('/api/users/blah/votes')
-        .send({ review_id: 1, vote: 1})
+        .send({ review_id: 1, vote: 1 })
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Key (username)=(blah) is not present in table \"users\".")
+          expect(body.msg).toBe(
+            'Key (username)=(blah) is not present in table "users".'
+          )
+        })
+    })
+  })
+  describe('userVoteCats', () => {
+    test('200:returns userVoteCats', () => {
+      return request(app)
+        .get('/api/users/bainesface/votes/categories')
+        .expect(200)
+        .then(({ body: { userVoteCategories } }) => {
+          expect(userVoteCategories).toHaveProperty('likes')
+          expect(userVoteCategories).toHaveProperty('dislikes')
+          expect(userVoteCategories).toHaveProperty('neutral')
+        })
+    })
+    test('200: Get returns empty array', () => {
+      return request(app)
+        .get('/api/users/dav3rid/votes/categories')
+        .expect(200)
+        .then(({ body: { userVoteCategories } }) => {
+          expect(userVoteCategories.likes.length).toBe(0)
+          expect(userVoteCategories.dislikes.length).toBe(0)
         })
     })
   })
