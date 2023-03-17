@@ -98,6 +98,15 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
     }
   },
+  "GET /api/users/:username/votes": {
+    "description": "serves a uservotes object, with a likes and dislikes array containing review_ids",
+    "queries": [],
+    "exampleResponse": {
+      "username": "bainesface",
+      "likes": [1, 3],
+      "dislikes": [5, 8]
+    }
+  },
   "POST /api/reviews/:review_id/comments": {
     "description": "inserts new comment into table using a request body like below - any extra keys will be ignored. Serves the new comment object with votes initiated at 0",
     "exampleRequestBody": {
@@ -148,6 +157,13 @@
     "exampleResponse": {
       "slug": "category name here",
       "description": "optional description"
+    }
+  },
+  "POST /api/users/:username/votes": {
+    "description": "inserts or updates a like or dislike vote for a user",
+    "exampleRequestBody": {
+      "vote": 1,
+      "review_id": 9
     }
   },
   "PATCH /api/reviews/:review_id": {
