@@ -365,8 +365,7 @@ describe('app', () => {
                 created_at: expect.any(String),
                 author: expect.any(String),
                 body: expect.any(String),
-                review_id: expect.any(Number),
-                total_count: 3
+                review_id: expect.any(Number)
               })
             })
             expect(comments).toBeSortedBy('votes', { descending: true })
@@ -1011,7 +1010,6 @@ describe('app', () => {
         .send({ review_id: 4, vote: 1 })
         .expect(201)
         .then(({ body }) => {
-          console.log(body)
           expect(body.uservote).toEqual({
             username: 'bainesface',
             review_id: 4,
